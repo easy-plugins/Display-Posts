@@ -34,7 +34,7 @@ function be_display_posts_shortcode( $atts ) {
 	 *
 	 * Use this filter to return from this function immediately, with the return of the filter callback.
 	 *
-	 * @since 3.0.2
+	 * @since 1.0
 	 *
 	 * @param bool  $short_circuit False to allow this function to continue, anything else to return that value.
 	 * @param array $atts          Shortcode attributes.
@@ -459,7 +459,7 @@ function be_display_posts_shortcode( $atts ) {
 	/**
 	 * Filter the arguments passed to WP_Query.
 	 *
-	 * @since 1.7
+	 * @since 1.0
 	 *
 	 * @param array $args          Parsed arguments to pass to WP_Query.
 	 * @param array $original_atts Original attributes passed to the shortcode.
@@ -470,7 +470,7 @@ function be_display_posts_shortcode( $atts ) {
 		/**
 		 * Filter content to display if no posts match the current query.
 		 *
-		 * @since 1.8
+		 * @since 1.0
 		 *
 		 * @param string $no_posts_message Content to display, returned via {@see wpautop()}.
 		 */
@@ -582,7 +582,7 @@ function be_display_posts_shortcode( $atts ) {
 			/**
 			 * Filter the list of categories attached to the current post.
 			 *
-			 * @since 2.4.2
+			 * @since 1.0
 			 *
 			 * @param string   $category_display Current Category Display text
 			 */
@@ -595,7 +595,7 @@ function be_display_posts_shortcode( $atts ) {
 		/**
 		 * Filter the post classes for the inner wrapper element of the current post.
 		 *
-		 * @since 2.2
+		 * @since 1.0
 		 *
 		 * @param array    $class         Post classes.
 		 * @param WP_Post  $post          Post object.
@@ -608,7 +608,7 @@ function be_display_posts_shortcode( $atts ) {
 		/**
 		 * Filter the HTML markup for output via the shortcode.
 		 *
-		 * @since 0.1.5
+		 * @since 1.0
 		 *
 		 * @param string $output        The shortcode's HTML output.
 		 * @param array  $original_atts Original attributes passed to the shortcode.
@@ -630,7 +630,7 @@ function be_display_posts_shortcode( $atts ) {
 	/**
 	 * Filter the shortcode output's opening outer wrapper element.
 	 *
-	 * @since 1.7
+	 * @since 1.0
 	 *
 	 * @param string $wrapper_open  HTML markup for the opening outer wrapper element.
 	 * @param array  $original_atts Original attributes passed to the shortcode.
@@ -641,7 +641,7 @@ function be_display_posts_shortcode( $atts ) {
 	/**
 	 * Filter the shortcode output's closing outer wrapper element.
 	 *
-	 * @since 1.7
+	 * @since 1.0
 	 *
 	 * @param string $wrapper_close HTML markup for the closing outer wrapper element.
 	 * @param array  $original_atts Original attributes passed to the shortcode.
@@ -656,7 +656,7 @@ function be_display_posts_shortcode( $atts ) {
 		/**
 		 * Filter the shortcode output title tag element.
 		 *
-		 * @since 2.3
+		 * @since 1.0
 		 *
 		 * @param string $tag           Type of element to use for the output title tag. Default 'h2'.
 		 * @param array  $original_atts Original attributes passed to the shortcode.
@@ -763,7 +763,7 @@ function be_sanitize_date_time( $date_time, $type = 'date', $accepts_string = fa
 	/**
 	 * Filter the sanitized segments for the given date or time string.
 	 *
-	 * @since 2.5
+	 * @since 1.0
 	 *
 	 * @param array  $segments  Array of sanitized date or time segments, e.g. hour, minute, second,
 	 *                          or year, month, day, depending on the value of the $type parameter.
@@ -791,7 +791,7 @@ function be_display_posts_off( $out, $pairs, $atts ) {
 	 * The function and filter were added for backward-compatibility with
 	 * 2.3 behavior in certain circumstances.
 	 *
-	 * @since 2.4.0
+	 * @since 1.0
 	 *
 	 * @param bool $disable Whether to disable the display-posts shortcode. Default true.
 	 */
