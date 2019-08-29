@@ -8,9 +8,9 @@
  *
  * Plugin Name:       Easy Plugins: Display Posts
  * Plugin URI:        https://connections-pro.com
- * Description:       Display a listing of posts using the [display-posts] shortcode.
+ * Description:       Display a listing of posts using the [display-posts] shortcode. Based on the excellent Display Posts Shortcode plugin by Bill Erickson.
  * Version:           1.0
- * Author:            Steven A. Zahm and Bill Erickson
+ * Author:            Steven A. Zahm
  * Author URI:        https://www.connections-pro.com
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
