@@ -39,7 +39,9 @@ function be_display_posts_shortcode( $atts ) {
 	 * @param bool  $short_circuit False to allow this function to continue, anything else to return that value.
 	 * @param array $atts          Shortcode attributes.
 	 */
-	$output = apply_filters( 'pre_display_posts_shortcode_output', false, $atts );
+	$output = apply_filters_deprecated( 'pre_display_posts_shortcode_output', array( FALSE ), '1.0', 'Easy_Plugins/Display_Posts/Render' );
+	$output = apply_filters( 'Easy_Plugins/Display_Posts/Render', $output, $atts );
+
 	if ( false !== $output ) {
 		return $output;
 	}
@@ -465,8 +467,16 @@ function be_display_posts_shortcode( $atts ) {
 	 * @param array $original_atts Original attributes passed to the shortcode.
 	 */
 	global $dps_listing;
-	$dps_listing = new WP_Query( apply_filters( 'display_posts_shortcode_args', $args, $original_atts ) );
+
+	$args = apply_filters_deprecated( 'display_posts_shortcode_args', array( $args, $original_atts ), '1.0', 'Easy_Plugins/Display_Posts/Query/Args' );
+	$args = apply_filters( 'Easy_Plugins/Display_Posts/Query/Args', $args, $original_atts );
+
+	$dps_listing = new WP_Query( $args );
+
 	if ( ! $dps_listing->have_posts() ) {
+
+		$no_posts_message = wpautop( $no_posts_message );
+
 		/**
 		 * Filter content to display if no posts match the current query.
 		 *
@@ -474,7 +484,10 @@ function be_display_posts_shortcode( $atts ) {
 		 *
 		 * @param string $no_posts_message Content to display, returned via {@see wpautop()}.
 		 */
-		return apply_filters( 'display_posts_shortcode_no_results', wpautop( $no_posts_message ) );
+		$no_posts_message = apply_filters_deprecated( 'display_posts_shortcode_args', array( $no_posts_message ), '1.0', 'Easy_Plugins/Display_Posts/No_Results' );
+		$no_posts_message = apply_filters( 'Easy_Plugins/Display_Posts/No_Results', $no_posts_message );
+
+		return $no_posts_message;
 	}
 
 	$inner = '';
@@ -517,14 +530,18 @@ function be_display_posts_shortcode( $atts ) {
 		}
 
 		if ( $include_author ) {
+
+			$author = ' <span class="author">by ' . get_the_author() . '</span>';
+
 			/**
 			 * Filter the HTML markup to display author information for the current post.
 			 *
-			 * @since 2.4.0
+			 * @since 1.0
 			 *
 			 * @param string $author_output HTML markup to display author information.
 			 */
-			$author = apply_filters( 'display_posts_shortcode_author', ' <span class="author">by ' . get_the_author() . '</span>', $original_atts );
+			$author = apply_filters_deprecated( 'display_posts_shortcode_author', array( $author, $original_atts ), '1.0', 'Easy_Plugins/Display_Posts/Post/Author' );
+			$author = apply_filters( 'Easy_Plugins/Display_Posts/Post/Author', $author, $original_atts );
 		}
 
 		if ( $include_excerpt ) {
@@ -536,7 +553,10 @@ function be_display_posts_shortcode( $atts ) {
 				$more   = $excerpt_more ? $excerpt_more : apply_filters( 'excerpt_more', '' );
 				$more   = $excerpt_more_link ? ' <a class="excerpt-more" href="' . get_permalink() . '">' . $more . '</a>' : ' <span class="excerpt-more">' . $more . '</span>';
 
-				if ( has_excerpt() && apply_filters( 'display_posts_shortcode_full_manual_excerpt', false ) ) {
+				$full_manual_excerpt = apply_filters_deprecated( 'display_posts_shortcode_full_manual_excerpt', array( FALSE ), '1.0', 'Easy_Plugins/Display_Posts/Post/Manual_Excerpt' );
+				$full_manual_excerpt = apply_filters( 'Easy_Plugins/Display_Posts/Post/Manual_Excerpt', $full_manual_excerpt );
+
+				if ( has_excerpt() && $full_manual_excerpt ) {
 					$excerpt = $post->post_excerpt . $more;
 				} elseif ( has_excerpt() ) {
 					$excerpt = wp_trim_words( strip_shortcodes( $post->post_excerpt ), $length ) . $more;
@@ -586,8 +606,8 @@ function be_display_posts_shortcode( $atts ) {
 			 *
 			 * @param string   $category_display Current Category Display text
 			 */
-			$category_display_text = apply_filters( 'display_posts_shortcode_category_display', $category_display_text, $terms, $category_display, $original_atts );
-
+			$category_display_text = apply_filters_deprecated( 'display_posts_shortcode_category_display', array( $category_display_text, $terms, $category_display, $original_atts ), '1.0', 'Easy_Plugins/Display_Posts/Post/Categories' );
+			$category_display_text = apply_filters( 'Easy_Plugins/Display_Posts/Post/Categories', $category_display_text, $terms, $category_display, $original_atts );
 		}
 
 		$class = array( 'listing-item' );
@@ -602,7 +622,10 @@ function be_display_posts_shortcode( $atts ) {
 		 * @param WP_Query $dps_listing       WP_Query object for the posts listing.
 		 * @param array    $original_atts Original attributes passed to the shortcode.
 		 */
-		$class  = array_map( 'sanitize_html_class', apply_filters( 'display_posts_shortcode_post_class', $class, $post, $dps_listing, $original_atts ) );
+		$class = apply_filters_deprecated( 'display_posts_shortcode_post_class', array( $class, $post, $dps_listing, $original_atts ), '1.0', 'Easy_Plugins/Display_Posts/Post/Class' );
+		$class = apply_filters( 'Easy_Plugins/Display_Posts/Post/Class', $class, $post, $dps_listing, $original_atts );
+
+		$class  = array_map( 'sanitize_html_class', $class );
 		$output = '<' . $inner_wrapper . ' class="' . implode( ' ', $class ) . '">' . $image . $title . $date . $author . $category_display_text . $excerpt . $content . '</' . $inner_wrapper . '>';
 
 		/**
@@ -622,7 +645,8 @@ function be_display_posts_shortcode( $atts ) {
 		 * @param string $author        HTML markup for the post's author.
 		 * @param string $category_display_text
 		 */
-		$inner .= apply_filters( 'display_posts_shortcode_output', $output, $original_atts, $image, $title, $date, $excerpt, $inner_wrapper, $content, $class, $author, $category_display_text );
+		$output = apply_filters_deprecated( 'display_posts_shortcode_output', array( $output, $original_atts, $image, $title, $date, $excerpt, $inner_wrapper, $content, $class, $author, $category_display_text ), '1.0', 'Easy_Plugins/Display_Posts/Post/HTML' );
+		$inner .= apply_filters( 'Easy_Plugins/Display_Posts/Post/HTML', $output, $original_atts, $image, $title, $date, $excerpt, $inner_wrapper, $content, $class, $author, $category_display_text );
 
 	endwhile;
 	wp_reset_postdata();
@@ -636,7 +660,8 @@ function be_display_posts_shortcode( $atts ) {
 	 * @param array  $original_atts Original attributes passed to the shortcode.
 	 * @param object $dps_listing, WP Query object
 	 */
-	$open = apply_filters( 'display_posts_shortcode_wrapper_open', '<' . $wrapper . $wrapper_class . $wrapper_id . '>', $original_atts, $dps_listing );
+	$open = apply_filters_deprecated( 'display_posts_shortcode_wrapper_open', array( '<' . $wrapper . $wrapper_class . $wrapper_id . '>', $original_atts, $dps_listing ), '1.0', 'Easy_Plugins/Display_Posts/HTML/Wrap_Open' );
+	$open = apply_filters( 'Easy_Plugins/Display_Posts/HTML/Wrap_Open', $open, $original_atts, $dps_listing );
 
 	/**
 	 * Filter the shortcode output's closing outer wrapper element.
@@ -647,7 +672,8 @@ function be_display_posts_shortcode( $atts ) {
 	 * @param array  $original_atts Original attributes passed to the shortcode.
 	 * @param object $dps_listing, WP Query object
 	 */
-	$close = apply_filters( 'display_posts_shortcode_wrapper_close', '</' . $wrapper . '>', $original_atts, $dps_listing );
+	$close = apply_filters_deprecated( 'display_posts_shortcode_wrapper_close', array( '</' . $wrapper . '>', $original_atts, $dps_listing ), '1.0', 'Easy_Plugins/Display_Posts/HTML/Wrap_Close' );
+	$close = apply_filters( 'Easy_Plugins/Display_Posts/HTML/Wrap_Close', $close, $original_atts, $dps_listing );
 
 	$return = '';
 
@@ -661,7 +687,8 @@ function be_display_posts_shortcode( $atts ) {
 		 * @param string $tag           Type of element to use for the output title tag. Default 'h2'.
 		 * @param array  $original_atts Original attributes passed to the shortcode.
 		 */
-		$title_tag = apply_filters( 'display_posts_shortcode_title_tag', 'h2', $original_atts );
+		$title_tag = apply_filters_deprecated( 'display_posts_shortcode_title_tag', array( 'h2', $original_atts ), '1.0', 'Easy_Plugins/Display_Posts/Posts/HTML/Title_Tag' );
+		$title_tag = apply_filters( 'Easy_Plugins/Display_Posts/Posts/HTML/Title_Tag', $title_tag, $original_atts );
 
 		$return .= '<' . $title_tag . ' class="display-posts-title">' . $shortcode_title . '</' . $title_tag . '>' . "\n";
 	}
@@ -771,7 +798,10 @@ function be_sanitize_date_time( $date_time, $type = 'date', $accepts_string = fa
 	 *                          formatted 'HH:MM:SS' or 'HH:MM'.
 	 * @param string $type      Type of string to sanitize. Can be either 'date' or 'time'.
 	 */
-	return apply_filters( 'display_posts_shortcode_sanitized_segments', $segments, $date_time, $type );
+	$segments = apply_filters_deprecated( 'display_posts_shortcode_sanitized_segments', array( $segments, $date_time, $type ), '1.0', 'Easy_Plugins/Display_Posts/Query/DateTime' );
+	$segments = apply_filters( 'Easy_Plugins/Display_Posts/Query/DateTime', $segments, $date_time, $type );
+
+	return $segments;
 }
 
 /**
@@ -785,6 +815,9 @@ function be_sanitize_date_time( $date_time, $type = 'date', $accepts_string = fa
  * @return array
  */
 function be_display_posts_off( $out, $pairs, $atts ) {
+
+	$off = TRUE;
+
 	/**
 	 * Filter whether to disable the display-posts shortcode.
 	 *
@@ -795,7 +828,11 @@ function be_display_posts_off( $out, $pairs, $atts ) {
 	 *
 	 * @param bool $disable Whether to disable the display-posts shortcode. Default true.
 	 */
-	$out['display_posts_off'] = apply_filters( 'display_posts_shortcode_inception_override', true );
+	$off = apply_filters_deprecated( 'display_posts_shortcode_inception_override', array( $off ), '1.0', 'Easy_Plugins/Display_Posts/Inception' );
+	$off = apply_filters( 'Easy_Plugins/Display_Posts/Inception', $off );
+
+	$out['display_posts_off'] = $off;
+
 	return $out;
 }
 
