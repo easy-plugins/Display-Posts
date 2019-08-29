@@ -115,7 +115,7 @@ function ezp_display_posts( $atts ) {
 
 	// End early if shortcode should be turned off.
 	if ( $atts['display_posts_off'] ) {
-		return;
+		return '';
 	}
 
 	$author                = sanitize_text_field( $atts['author'] );
