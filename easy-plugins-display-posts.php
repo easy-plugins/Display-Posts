@@ -582,7 +582,7 @@ function ezp_display_posts( $atts ) {
 			add_filter( 'shortcode_atts_display-posts', 'ezp_display_posts_off', 10, 3 );
 			/** This filter is documented in wp-includes/post-template.php */
 			$content = '<div class="' . implode( ' ', $content_class ) . '">' . apply_filters( 'the_content', get_the_content() ) . '</div>';
-			remove_filter( 'shortcode_atts_display-posts', 'ezp_display_posts_off', 10, 3 );
+			remove_filter( 'shortcode_atts_display-posts', 'ezp_display_posts_off', 10 );
 		}
 
 		// Display categories the post is in.
