@@ -18,7 +18,7 @@
  * Domain Path:       /languages
  */
 
-add_shortcode( 'display-posts', 'be_display_posts_shortcode' );
+add_shortcode( 'display-posts', 'ezp_display_posts' );
 /**
  * Callback for the display-posts shortcode.
  *
@@ -27,7 +27,7 @@ add_shortcode( 'display-posts', 'be_display_posts_shortcode' );
  * @param array $atts Shortcode attributes.
  * @return string
  */
-function be_display_posts_shortcode( $atts ) {
+function ezp_display_posts( $atts ) {
 
 	/**
 	 * Short circuit filter.
@@ -200,7 +200,7 @@ function be_display_posts_shortcode( $atts ) {
 		$args['orderby'] = $orderby;
 	}
 	if ( ! empty( $post_type ) ) {
-		$args['post_type'] = be_dps_explode( $post_type );
+		$args['post_type'] = ezp_display_posts_explode( $post_type );
 	}
 	if ( ! empty( $posts_per_page ) ) {
 		$args['posts_per_page'] = $posts_per_page;
@@ -229,7 +229,7 @@ function be_display_posts_shortcode( $atts ) {
 		$valid_compare_ops = array( '=', '!=', '>', '>=', '<', '<=', 'IN', 'NOT IN', 'BETWEEN', 'NOT BETWEEN' );
 
 		// Sanitize and add date segments.
-		$dates = be_sanitize_date_time( $date );
+		$dates = ezp_display_posts_sanitize_date_time( $date );
 		if ( ! empty( $dates ) ) {
 			if ( is_string( $dates ) ) {
 				$timestamp = strtotime( $dates );
@@ -245,7 +245,7 @@ function be_display_posts_shortcode( $atts ) {
 		}
 
 		// Sanitize and add time segments.
-		$times = be_sanitize_date_time( $time, 'time' );
+		$times = ezp_display_posts_sanitize_date_time( $time, 'time' );
 		if ( ! empty( $times ) ) {
 			foreach ( $times as $arg => $segment ) {
 				$initial_date_query[ $arg ] = $segment;
@@ -253,13 +253,13 @@ function be_display_posts_shortcode( $atts ) {
 		}
 
 		// Date query 'before' argument.
-		$before = be_sanitize_date_time( $date_query_before, 'date', true );
+		$before = ezp_display_posts_sanitize_date_time( $date_query_before, 'date', true );
 		if ( ! empty( $before ) ) {
 			$initial_date_query['before'] = $before;
 		}
 
 		// Date query 'after' argument.
-		$after = be_sanitize_date_time( $date_query_after, 'date', true );
+		$after = ezp_display_posts_sanitize_date_time( $date_query_after, 'date', true );
 		if ( ! empty( $after ) ) {
 			$initial_date_query['after'] = $after;
 		}
@@ -317,14 +317,14 @@ function be_display_posts_shortcode( $atts ) {
 
 	// If Post IDs.
 	if ( $id ) {
-		$posts_in         = array_map( 'intval', be_dps_explode( $id ) );
+		$posts_in         = array_map( 'intval', ezp_display_posts_explode( $id ) );
 		$args['post__in'] = $posts_in;
 	}
 
 	// If Exclude.
 	$post__not_in = array();
 	if ( ! empty( $exclude ) ) {
-		$post__not_in = array_map( 'intval', be_dps_explode( $exclude ) );
+		$post__not_in = array_map( 'intval', ezp_display_posts_explode( $exclude ) );
 	}
 	if ( is_singular() && $exclude_current ) {
 		$post__not_in[] = get_the_ID();
@@ -352,7 +352,7 @@ function be_display_posts_shortcode( $atts ) {
 	}
 
 	// Post Status.
-	$post_status = be_dps_explode( $post_status );
+	$post_status = ezp_display_posts_explode( $post_status );
 	$validated   = array();
 	$available   = array( 'publish', 'pending', 'draft', 'auto-draft', 'future', 'private', 'inherit', 'trash', 'any' );
 	foreach ( $post_status as $unvalidated ) {
@@ -376,7 +376,7 @@ function be_display_posts_shortcode( $atts ) {
 			}
 		} else {
 			// Term string to array.
-			$tax_term = be_dps_explode( $tax_term );
+			$tax_term = ezp_display_posts_explode( $tax_term );
 		}
 
 		// Validate operator.
@@ -407,7 +407,7 @@ function be_display_posts_shortcode( $atts ) {
 			// Sanitize values.
 			$more_tax_queries     = true;
 			$taxonomy             = sanitize_key( $original_atts[ 'taxonomy_' . $count ] );
-			$terms                = be_dps_explode( sanitize_text_field( $original_atts[ 'tax_' . $count . '_term' ] ) );
+			$terms                = ezp_display_posts_explode( sanitize_text_field( $original_atts[ 'tax_' . $count . '_term' ] ) );
 			$tax_operator         = isset( $original_atts[ 'tax_' . $count . '_operator' ] ) ? $original_atts[ 'tax_' . $count . '_operator' ] : 'IN';
 			$tax_operator         = in_array( $tax_operator, array( 'IN', 'NOT IN', 'AND' ), true ) ? $tax_operator : 'IN';
 			$tax_include_children = isset( $original_atts[ 'tax_' . $count . '_include_children' ] ) ? filter_var( $atts[ 'tax_' . $count . '_include_children' ], FILTER_VALIDATE_BOOLEAN ) : true;
@@ -444,10 +444,10 @@ function be_display_posts_shortcode( $atts ) {
 	}
 
 	if ( false !== $post_parent__in ) {
-		$args['post_parent__in'] = array_map( 'intval', be_dps_explode( $atts['post_parent__in'] ) );
+		$args['post_parent__in'] = array_map( 'intval', ezp_display_posts_explode( $atts['post_parent__in'] ) );
 	}
 	if ( false !== $post_parent__not_in ) {
-		$args['post_parent__not_in'] = array_map( 'intval', be_dps_explode( $atts['post_parent__in'] ) );
+		$args['post_parent__not_in'] = array_map( 'intval', ezp_display_posts_explode( $atts['post_parent__in'] ) );
 	}
 
 	// Set up html elements used to wrap the posts.
@@ -521,9 +521,9 @@ function be_display_posts_shortcode( $atts ) {
 		}
 
 		if ( $include_date ) {
-			$date = 'relative' === $date_format ? be_dps_relative_date( get_the_date( 'U' ) ) : get_the_date( $date_format );
+			$date = 'relative' === $date_format ? ezp_display_posts_relative_date( get_the_date( 'U' ) ) : get_the_date( $date_format );
 		} elseif ( $include_date_modified ) {
-			$date = 'relative' === $date_format ? be_dps_relative_date( get_the_modified_time( 'U' ) ) : get_the_modified_date( $date_format );
+			$date = 'relative' === $date_format ? ezp_display_posts_relative_date( get_the_modified_time( 'U' ) ) : get_the_modified_date( $date_format );
 		}
 		if ( ! empty( $date ) ) {
 			$date = ' <span class="date">' . $date . '</span>';
@@ -579,10 +579,10 @@ function be_display_posts_shortcode( $atts ) {
 		}
 
 		if ( $include_content ) {
-			add_filter( 'shortcode_atts_display-posts', 'be_display_posts_off', 10, 3 );
+			add_filter( 'shortcode_atts_display-posts', 'ezp_display_posts_off', 10, 3 );
 			/** This filter is documented in wp-includes/post-template.php */
 			$content = '<div class="' . implode( ' ', $content_class ) . '">' . apply_filters( 'the_content', get_the_content() ) . '</div>';
-			remove_filter( 'shortcode_atts_display-posts', 'be_display_posts_off', 10, 3 );
+			remove_filter( 'shortcode_atts_display-posts', 'ezp_display_posts_off', 10, 3 );
 		}
 
 		// Display categories the post is in.
@@ -712,7 +712,7 @@ function be_display_posts_shortcode( $atts ) {
  * @return array|string Array of valid date or time segments, a timestamp, otherwise
  *                      an empty array.
  */
-function be_sanitize_date_time( $date_time, $type = 'date', $accepts_string = false ) {
+function ezp_display_posts_sanitize_date_time( $date_time, $type = 'date', $accepts_string = false ) {
 	if ( empty( $date_time ) || ! in_array( $type, array( 'date', 'time' ), true ) ) {
 		return array();
 	}
@@ -814,7 +814,7 @@ function be_sanitize_date_time( $date_time, $type = 'date', $accepts_string = fa
  * @param array $atts  Original shortcode attributes.
  * @return array
  */
-function be_display_posts_off( $out, $pairs, $atts ) {
+function ezp_display_posts_off( $out, $pairs, $atts ) {
 
 	$off = TRUE;
 
@@ -842,7 +842,7 @@ function be_display_posts_off( $out, $pairs, $atts ) {
  * @param string $string String to split up.
  * @return array Array of string parts.
  */
-function be_dps_explode( $string = '' ) {
+function ezp_display_posts_explode( $string = '' ) {
 	$string = str_replace( ', ', ',', $string );
 	return explode( ',', $string );
 }
@@ -853,6 +853,6 @@ function be_dps_explode( $string = '' ) {
  * @param int $date Unix timestamp.
  * @return string Human readable time difference.
  */
-function be_dps_relative_date( $date ) {
+function ezp_display_posts_relative_date( $date ) {
 	return human_time_diff( $date ) . ' ' . __( 'ago', 'display-posts' );
 }
