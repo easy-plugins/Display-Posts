@@ -368,7 +368,7 @@ function ezp_display_posts( $atts ) {
 	if ( ! empty( $taxonomy ) && ! empty( $tax_term ) ) {
 
 		if ( 'current' === $tax_term ) {
-			global $post;
+			//global $post;
 			$terms    = wp_get_post_terms( get_the_ID(), $taxonomy );
 			$tax_term = array();
 			foreach ( $terms as $term ) {
