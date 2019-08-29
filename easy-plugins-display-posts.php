@@ -1,25 +1,21 @@
 <?php
 /**
- * Plugin Name: Display Posts
- * Plugin URI: https://displayposts.com
- * Description: Display a listing of posts using the [display-posts] shortcode
- * Version: 3.0.2
- * Author: Bill Erickson
- * Author URI: https://www.billerickson.net
+ * @package   Easy Plugins: Display Posts
+ * @author    Steven A. Zahm
+ * @license   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ * @link      https://connections-pro.com
+ * @copyright 2019 Steven A. Zahm
  *
- * This program is free software; you can redistribute it and/or modify it under the terms of the GNU
- * General Public License version 2, as published by the Free Software Foundation.  You may NOT assume
- * that you can use any other version of the GPL.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
- * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- *
- * @package Display Posts
- * @version 3.0.2
- * @author Bill Erickson <bill@billerickson.net>
- * @copyright Copyright (c) 2011, Bill Erickson
- * @link https://displayposts.com
- * @license http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ * Plugin Name:       Easy Plugins: Display Posts
+ * Plugin URI:        https://connections-pro.com
+ * Description:       Display a listing of posts using the [display-posts] shortcode.
+ * Version:           1.0
+ * Author:            Steven A. Zahm and Bill Erickson
+ * Author URI:        https://www.connections-pro.com
+ * License:           GPL-2.0+
+ * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
+ * Text Domain:       easy-plugins-display-posts
+ * Domain Path:       /languages
  */
 
 add_shortcode( 'display-posts', 'be_display_posts_shortcode' );
