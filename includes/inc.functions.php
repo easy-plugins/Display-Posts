@@ -118,3 +118,28 @@ function to_array( $string = '' ) {
 	$string = str_replace( ', ', ',', $string );
 	return explode( ',', $string );
 }
+
+/**
+ * Converts the following strings: yes/no; true/false and 0/1 to boolean values.
+ * If the supplied string does not match one of those values the method will return NULL.
+ *
+ * @since 1.0
+ *
+ * @param string|int|bool $value
+ *
+ * @return bool
+ */
+function to_boolean( $value ) {
+
+	// Already a bool, return it.
+	if ( is_bool( $value ) ) return $value;
+
+	$value = filter_var( strtolower( $value ), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+
+	if ( is_null( $value ) ) {
+
+		$value = FALSE;
+	}
+
+	return $value;
+}

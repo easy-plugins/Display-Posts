@@ -2,9 +2,10 @@
 
 namespace Easy_Plugins\Shortcode;
 
+use WP_Error;
 use WP_Post;
 use WP_Query;
-use function Easy_Plugins\Functions\{to_array, sanitize_date_time};
+use function Easy_Plugins\Functions\{to_array, sanitize_date_time, to_boolean};
 use function Easy_Plugins\Formatting\{relative_date};
 
 class Display_Posts {
@@ -76,6 +77,102 @@ class Display_Posts {
 	}
 
 	/**
+	 * @param string $key
+	 * @param array  $atts
+	 *
+	 * @return array|bool|int|string|WP_Error
+	 */
+	private static function get_option( $key, $atts ) {
+
+		if ( ! in_array( $key, self::defaults() ) ) {
+
+			return new WP_Error(
+				'invalid option',
+				esc_html__( 'Invalid should option called.', 'easy-plugins-display-posts' ),
+				$key
+			);
+		}
+
+		switch ( $key ) {
+
+			case 'author':
+			case 'category':
+			case 'category_label':
+			case 'date_format':
+			case 'date':
+			case 'date_column':
+			case 'date_compare':
+			case 'date_query_before':
+			case 'date_query_after':
+			case 'date_query_column':
+			case 'date_query_compare':
+			case 'excerpt_more':
+			case 'meta_key':
+			case 'meta_value':
+			case 'no_posts_message':
+			case 'post_type':
+			case 's':
+			case 'tag':
+			case 'tax_term':
+			case 'time':
+			case 'title':
+			case 'wrapper':
+
+				$value = sanitize_text_field( $atts[ $key ] );
+				break;
+
+			case 'excerpt_more_link':
+			case 'exclude_current':
+			case 'ignore_sticky_posts':
+			case 'include_title':
+			case 'include_author':
+			case 'include_content':
+			case 'include_date':
+			case 'include_date_modified':
+			case 'include_excerpt':
+			case 'include_excerpt_dash':
+			case 'include_link':
+			case 'tax_include_children':
+
+				$value = to_boolean( $atts[ $key ] );
+				break;
+
+			case 'author_id':
+			case 'category_id':
+			case 'excerpt_length':
+			case 'offset':
+			case 'posts_per_page':
+
+				$value = absint( $atts[ $key ] );
+				break;
+
+			case 'image_size':
+			case 'order':
+			case 'orderby':
+			case 'taxonomy':
+
+			$value = sanitize_key( $atts[ $key ] );
+				break;
+
+			case 'content_class':
+			case 'wrapper_class':
+
+				$value = array_map( 'sanitize_html_class', explode( ' ', $atts[ $key ] ) );
+				break;
+
+			default:
+
+				$value = new WP_Error(
+					'invalid option',
+					esc_html__( 'Invalid should option called.', 'easy-plugins-display-posts' ),
+					$key
+				);
+		}
+
+		return $value;
+	}
+
+	/**
 	 * Callback for the display-posts shortcode.
 	 *
 	 * To customize, use the following filters: https://displayposts.com/docs/filters/
@@ -116,60 +213,60 @@ class Display_Posts {
 			return '';
 		}
 
-		$author                = sanitize_text_field( $atts['author'] );
-		$author_id             = (int) $atts['author_id'];
-		$category              = sanitize_text_field( $atts['category'] );
+		$author                = self::get_option( 'author', $atts );
+		$author_id             = self::get_option( 'author_id', $atts );
+		$category              = self::get_option( 'category', $atts );
 		$category_display      = 'true' === $atts['category_display'] ? 'category' : sanitize_text_field( $atts['category_display'] );
-		$category_id           = (int) $atts['category_id'];
-		$category_label        = sanitize_text_field( $atts['category_label'] );
-		$content_class         = array_map( 'sanitize_html_class', explode( ' ', $atts['content_class'] ) );
-		$date_format           = sanitize_text_field( $atts['date_format'] );
-		$date                  = sanitize_text_field( $atts['date'] );
-		$date_column           = sanitize_text_field( $atts['date_column'] );
-		$date_compare          = sanitize_text_field( $atts['date_compare'] );
-		$date_query_before     = sanitize_text_field( $atts['date_query_before'] );
-		$date_query_after      = sanitize_text_field( $atts['date_query_after'] );
-		$date_query_column     = sanitize_text_field( $atts['date_query_column'] );
-		$date_query_compare    = sanitize_text_field( $atts['date_query_compare'] );
-		$excerpt_length        = (int) $atts['excerpt_length'];
-		$excerpt_more          = sanitize_text_field( $atts['excerpt_more'] );
-		$excerpt_more_link     = filter_var( $atts['excerpt_more_link'], FILTER_VALIDATE_BOOLEAN );
+		$category_id           = self::get_option( 'category_id', $atts );
+		//$category_label        = self::get_option( 'category_label', $atts );
+		//$content_class         = self::get_option( 'content_class', $atts );
+		$date_format           = self::get_option( 'date_format', $atts );
+		$date                  = self::get_option( 'date', $atts );
+		$date_column           = self::get_option( 'date_column', $atts );
+		$date_compare          = self::get_option( 'date_compare', $atts );
+		$date_query_before     = self::get_option( 'date_query_before', $atts );
+		$date_query_after      = self::get_option( 'date_query_after', $atts );
+		$date_query_column     = self::get_option( 'date_query_column', $atts );
+		$date_query_compare    = self::get_option( 'date_query_compare', $atts );
+		$excerpt_length        = self::get_option( 'excerpt_length', $atts );
+		$excerpt_more          = self::get_option( 'excerpt_more', $atts );
+		$excerpt_more_link     = self::get_option( 'excerpt_more_link', $atts );
 		$exclude               = $atts['exclude']; // Sanitized later as an array of integers.
-		$exclude_current       = filter_var( $atts['exclude_current'], FILTER_VALIDATE_BOOLEAN );
+		$exclude_current       = self::get_option( 'exclude_current', $atts );
 		$has_password          = null !== $atts['has_password'] ? filter_var( $atts['has_password'], FILTER_VALIDATE_BOOLEAN ) : null;
 		$id                    = $atts['id']; // Sanitized later as an array of integers.
-		$ignore_sticky_posts   = filter_var( $atts['ignore_sticky_posts'], FILTER_VALIDATE_BOOLEAN );
-		$image_size            = sanitize_key( $atts['image_size'] );
-		$include_title         = filter_var( $atts['include_title'], FILTER_VALIDATE_BOOLEAN );
-		$include_author        = filter_var( $atts['include_author'], FILTER_VALIDATE_BOOLEAN );
-		$include_content       = filter_var( $atts['include_content'], FILTER_VALIDATE_BOOLEAN );
-		$include_date          = filter_var( $atts['include_date'], FILTER_VALIDATE_BOOLEAN );
-		$include_date_modified = filter_var( $atts['include_date_modified'], FILTER_VALIDATE_BOOLEAN );
-		$include_excerpt       = filter_var( $atts['include_excerpt'], FILTER_VALIDATE_BOOLEAN );
-		$include_excerpt_dash  = filter_var( $atts['include_excerpt_dash'], FILTER_VALIDATE_BOOLEAN );
-		$include_link          = filter_var( $atts['include_link'], FILTER_VALIDATE_BOOLEAN );
-		$meta_key              = sanitize_text_field( $atts['meta_key'] );
-		$meta_value            = sanitize_text_field( $atts['meta_value'] );
-		$no_posts_message      = sanitize_text_field( $atts['no_posts_message'] );
-		$offset                = (int) $atts['offset'];
-		$order                 = sanitize_key( $atts['order'] );
-		$orderby               = sanitize_key( $atts['orderby'] );
+		//$ignore_sticky_posts   = self::get_option( 'ignore_sticky_posts', $atts );
+		$image_size            = self::get_option( 'image_size', $atts );
+		$include_title         = self::get_option( 'include_title', $atts );
+		//$include_author        = self::get_option( 'include_author', $atts );
+		//$include_content       = self::get_option( 'include_content', $atts );
+		//$include_date          = self::get_option( 'include_date', $atts );
+		//$include_date_modified = self::get_option( 'include_date_modified', $atts );
+		//$include_excerpt       = self::get_option( 'include_excerpt', $atts );
+		//$include_excerpt_dash  = self::get_option( 'include_excerpt_dash', $atts );
+		$include_link          = self::get_option( 'include_link', $atts );
+		$meta_key              = self::get_option( 'meta_key', $atts );
+		$meta_value            = self::get_option( 'meta_value', $atts );
+		$no_posts_message      = self::get_option( 'no_posts_message', $atts );
+		$offset                = self::get_option( 'offset', $atts );
+		$order                 = self::get_option( 'order', $atts );
+		$orderby               = self::get_option( 'orderby', $atts );
 		$post_parent           = $atts['post_parent']; // Validated later, after check for 'current'.
 		$post_parent__in       = $atts['post_parent__in'];
 		$post_parent__not_in   = $atts['post_parent__not_in'];
 		$post_status           = $atts['post_status']; // Validated later as one of a few values.
-		$post_type             = sanitize_text_field( $atts['post_type'] );
-		$posts_per_page        = (int) $atts['posts_per_page'];
-		$s                     = sanitize_text_field( $atts['s'] );
-		$tag                   = sanitize_text_field( $atts['tag'] );
+		$post_type             = self::get_option( 'post_type', $atts );
+		$posts_per_page        = self::get_option( 'posts_per_page', $atts );
+		$s                     = self::get_option( 's', $atts );
+		$tag                   = self::get_option( 'tag', $atts );
 		$tax_operator          = $atts['tax_operator']; // Validated later as one of a few values.
-		$tax_include_children  = filter_var( $atts['tax_include_children'], FILTER_VALIDATE_BOOLEAN );
-		$tax_term              = sanitize_text_field( $atts['tax_term'] );
-		$taxonomy              = sanitize_key( $atts['taxonomy'] );
-		$time                  = sanitize_text_field( $atts['time'] );
-		$shortcode_title       = sanitize_text_field( $atts['title'] );
-		$wrapper               = sanitize_text_field( $atts['wrapper'] );
-		$wrapper_class         = array_map( 'sanitize_html_class', explode( ' ', $atts['wrapper_class'] ) );
+		$tax_include_children  = self::get_option( 'tax_include_children', $atts );
+		$tax_term              = self::get_option( 'tax_term', $atts );
+		$taxonomy              = self::get_option( 'taxonomy', $atts );
+		$time                  = self::get_option( 'time', $atts );
+		$shortcode_title       = self::get_option( 'title', $atts );
+		$wrapper               = self::get_option( 'wrapper', $atts );
+		$wrapper_class         = self::get_option( 'wrapper_class', $atts );
 
 		if ( ! empty( $wrapper_class ) ) {
 			$wrapper_class = ' class="' . implode( ' ', $wrapper_class ) . '"';
@@ -294,7 +391,7 @@ class Display_Posts {
 		}
 
 		// Ignore Sticky Posts.
-		if ( $ignore_sticky_posts ) {
+		if ( self::get_option( 'ignore_sticky_posts', $atts ) ) {
 			$args['ignore_sticky_posts'] = true;
 		}
 
@@ -530,16 +627,16 @@ class Display_Posts {
 			 */
 			$image = apply_filters( 'Easy_Plugins/Display_Posts/Post/Image', $image, $image_size, $include_link, $original_atts );
 
-			if ( $include_date ) {
+			if ( self::get_option( 'include_date', $atts ) ) {
 				$date = 'relative' === $date_format ? relative_date( get_the_date( 'U' ) ) : get_the_date( $date_format );
-			} elseif ( $include_date_modified ) {
+			} elseif ( self::get_option( 'include_date_modified', $atts ) ) {
 				$date = 'relative' === $date_format ? relative_date( get_the_modified_time( 'U' ) ) : get_the_modified_date( $date_format );
 			}
 			if ( ! empty( $date ) ) {
 				$date = ' <span class="date">' . $date . '</span>';
 			}
 
-			if ( $include_author ) {
+			if ( self::get_option( 'include_author', $atts ) ) {
 
 				$author = ' <span class="author">by ' . get_the_author() . '</span>';
 
@@ -554,7 +651,7 @@ class Display_Posts {
 				$author = apply_filters( 'Easy_Plugins/Display_Posts/Post/Author', $author, $original_atts );
 			}
 
-			if ( $include_excerpt ) {
+			if ( self::get_option( 'include_excerpt', $atts ) ) {
 
 				// Custom build excerpt based on shortcode parameters.
 				if ( $excerpt_length || $excerpt_more || $excerpt_more_link ) {
@@ -582,16 +679,16 @@ class Display_Posts {
 				if ( ! empty( $excerpt ) ) {
 
 					$excerpt = ' <span class="excerpt">' . $excerpt . '</span>';
-					if ( $include_excerpt_dash ) {
+					if ( self::get_option( 'include_excerpt_dash', $atts ) ) {
 						$excerpt = ' <span class="excerpt-dash">-</span>' . $excerpt;
 					}
 				}
 			}
 
-			if ( $include_content ) {
+			if ( self::get_option( 'include_content', $atts ) ) {
 				add_filter( 'shortcode_atts_display-posts', array( __CLASS__, 'ezp_display_posts_off' ), 10, 3 );
 				/** This filter is documented in wp-includes/post-template.php */
-				$content = '<div class="' . implode( ' ', $content_class ) . '">' . apply_filters( 'the_content', get_the_content() ) . '</div>';
+				$content = '<div class="' . implode( ' ', self::get_option( 'content_class', $atts ) ) . '">' . apply_filters( 'the_content', get_the_content() ) . '</div>';
 				remove_filter( 'shortcode_atts_display-posts', array( __CLASS__, 'ezp_display_posts_off' ), 10 );
 			}
 
@@ -606,7 +703,7 @@ class Display_Posts {
 					foreach ( $terms as $term ) {
 						$term_output[] = '<a href="' . get_term_link( $term, $category_display ) . '">' . $term->name . '</a>';
 					}
-					$category_display_text = ' <span class="category-display"><span class="category-display-label">' . $category_label . '</span> ' . implode( ', ', $term_output ) . '</span>';
+					$category_display_text = ' <span class="category-display"><span class="category-display-label">' . self::get_option( 'category_label', $atts ) . '</span> ' . implode( ', ', $term_output ) . '</span>';
 				}
 
 				/**
