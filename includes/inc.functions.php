@@ -1,6 +1,6 @@
 <?php
 
-namespace Easy_Plugins\Functions;
+namespace Easy_Plugins\Display_Posts\Functions;
 
 /**
  * Sanitize the segments of a given date or time for a date query.

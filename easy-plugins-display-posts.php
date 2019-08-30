@@ -1,6 +1,6 @@
 <?php
 
-namespace Easy_Plugins;
+namespace Easy_Plugins\Display_Posts;
 
 /**
  * @package   Easy Plugins: Display Posts
@@ -25,4 +25,4 @@ require_once 'includes/class.shortcode-display-posts.php';
 require_once 'includes/inc.format.php';
 require_once 'includes/inc.functions.php';
 
-add_shortcode( 'display-posts', array( 'Easy_Plugins\Shortcode\Display_Posts', 'render' ) );
+add_shortcode( 'display-posts', array( 'Easy_Plugins\Display_Posts\Shortcode\Display_Posts', 'render' ) );

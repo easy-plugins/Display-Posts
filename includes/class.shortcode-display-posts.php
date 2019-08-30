@@ -1,12 +1,12 @@
 <?php
 
-namespace Easy_Plugins\Shortcode;
+namespace Easy_Plugins\Display_Posts\Shortcode;
 
 use WP_Error;
 use WP_Post;
 use WP_Query;
-use function Easy_Plugins\Functions\{to_array, sanitize_date_time, to_boolean};
-use function Easy_Plugins\Formatting\{relative_date};
+use function Easy_Plugins\Display_Posts\Functions\{to_array, sanitize_date_time, to_boolean};
+use function Easy_Plugins\Display_Posts\Formatting\{relative_date};
 
 class Display_Posts {
 

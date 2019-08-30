@@ -1,6 +1,6 @@
 <?php
 
-namespace Easy_Plugins\Formatting;
+namespace Easy_Plugins\Display_Posts\Formatting;
 
 /**
  * Get a relative data with "ago" suffix.
