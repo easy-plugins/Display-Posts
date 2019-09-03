@@ -21,7 +21,33 @@ namespace Easy_Plugins\Display_Posts;
  * Domain Path:       /languages
  */
 
-require_once 'includes/class.shortcode-display-posts.php';
+spl_autoload_register(
+	function( $class ) {
+
+		$registry = array(
+			'Easy_Plugins\Display_Posts\Query'                   => 'includes/class.query.php',
+			'Easy_Plugins\Display_Posts\Shortcode\Display_Posts' => 'includes/class.shortcode-display-posts.php',
+		);
+
+		if ( ! isset( $registry[ $class ] ) ) {
+
+			return;
+		}
+
+		$file = plugin_dir_path( __FILE__ ) . $registry[ $class ];
+
+		// if the file exists, require it
+		if ( file_exists( $file ) ) {
+
+			require $file;
+
+		} else {
+
+			wp_die( esc_html( "The file attempting to be loaded at $file does not exist." ) );
+		}
+	}
+);
+
 require_once 'includes/inc.format.php';
 require_once 'includes/inc.functions.php';
 

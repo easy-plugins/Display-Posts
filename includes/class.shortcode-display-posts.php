@@ -2,10 +2,10 @@
 
 namespace Easy_Plugins\Display_Posts\Shortcode;
 
-use WP_Error;
+use Easy_Plugins\Display_Posts\Query;
 use WP_Post;
 use WP_Query;
-use function Easy_Plugins\Display_Posts\Functions\{to_array, sanitize_date_time, to_boolean};
+use function Easy_Plugins\Display_Posts\Functions\{to_boolean};
 use function Easy_Plugins\Display_Posts\Formatting\{relative_date};
 
 class Display_Posts {
@@ -17,30 +17,14 @@ class Display_Posts {
 	public static function defaults() {
 
 		return array(
-			'author'                => '',
-			'author_id'             => '',
-			'category'              => '',
 			'category_display'      => '',
-			'category_id'           => FALSE,
 			'category_label'        => esc_html__( 'Posted in: ', 'easy-plugins-display-posts' ),
 			'content_class'         => 'content',
 			'date_format'           => '(n/j/Y)',
-			'date'                  => '',
-			'date_column'           => 'post_date',
-			'date_compare'          => '=',
-			'date_query_before'     => '',
-			'date_query_after'      => '',
-			'date_query_column'     => '',
-			'date_query_compare'    => '',
 			'display_posts_off'     => FALSE,
 			'excerpt_length'        => FALSE,
 			'excerpt_more'          => FALSE,
 			'excerpt_more_link'     => FALSE,
-			'exclude'               => FALSE,
-			'exclude_current'       => FALSE,
-			'has_password'          => NULL,
-			'id'                    => FALSE,
-			'ignore_sticky_posts'   => FALSE,
 			'image_size'            => FALSE,
 			'include_author'        => FALSE,
 			'include_content'       => FALSE,
@@ -50,25 +34,7 @@ class Display_Posts {
 			'include_excerpt_dash'  => TRUE,
 			'include_link'          => TRUE,
 			'include_title'         => TRUE,
-			'meta_key'              => '', // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_key
-			'meta_value'            => '', // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_value
 			'no_posts_message'      => '',
-			'offset'                => 0,
-			'order'                 => 'DESC',
-			'orderby'               => 'date',
-			'post_parent'           => FALSE,
-			'post_parent__in'       => FALSE,
-			'post_parent__not_in'   => FALSE,
-			'post_status'           => 'publish',
-			'post_type'             => 'post',
-			'posts_per_page'        => '10',
-			's'                     => FALSE,
-			'tag'                   => '',
-			'tax_operator'          => 'IN',
-			'tax_include_children'  => TRUE,
-			'tax_term'              => FALSE,
-			'taxonomy'              => FALSE,
-			'time'                  => '',
 			'title'                 => '',
 			'wrapper'               => 'ul',
 			'wrapper_class'         => 'display-posts-listing',
@@ -79,52 +45,31 @@ class Display_Posts {
 	/**
 	 * @param string $key
 	 * @param array  $atts
+	 * @param null   $default
 	 *
-	 * @return array|bool|int|string|WP_Error
+	 * @return array|bool|int|string|null
 	 */
-	private static function get_option( $key, $atts ) {
+	private static function get_option( $key, $atts, $default = NULL ) {
 
 		if ( ! in_array( $key, self::defaults() ) ) {
 
-			return new WP_Error(
-				'invalid option',
-				esc_html__( 'Invalid should option called.', 'easy-plugins-display-posts' ),
-				$key
-			);
+			return $default;
 		}
 
 		switch ( $key ) {
 
-			case 'author':
-			case 'category':
 			case 'category_label':
 			case 'date_format':
-			case 'date':
-			case 'date_column':
-			case 'date_compare':
-			case 'date_query_before':
-			case 'date_query_after':
-			case 'date_query_column':
-			case 'date_query_compare':
 			case 'excerpt_more':
-			case 'meta_key':
-			case 'meta_value':
 			case 'no_posts_message':
-			case 'post_type':
-			case 's':
-			case 'tag':
-			case 'tax_term':
-			case 'time':
 			case 'title':
 			case 'wrapper':
 
 				$value = sanitize_text_field( $atts[ $key ] );
 				break;
 
+			case 'display_posts_off':
 			case 'excerpt_more_link':
-			case 'exclude_current':
-			case 'ignore_sticky_posts':
-			case 'include_title':
 			case 'include_author':
 			case 'include_content':
 			case 'include_date':
@@ -132,24 +77,17 @@ class Display_Posts {
 			case 'include_excerpt':
 			case 'include_excerpt_dash':
 			case 'include_link':
-			case 'tax_include_children':
+			case 'include_title':
 
 				$value = to_boolean( $atts[ $key ] );
 				break;
 
-			case 'author_id':
-			case 'category_id':
 			case 'excerpt_length':
-			case 'offset':
-			case 'posts_per_page':
 
 				$value = absint( $atts[ $key ] );
 				break;
 
 			case 'image_size':
-			case 'order':
-			case 'orderby':
-			case 'taxonomy':
 
 			$value = sanitize_key( $atts[ $key ] );
 				break;
@@ -162,11 +100,7 @@ class Display_Posts {
 
 			default:
 
-				$value = new WP_Error(
-					'invalid option',
-					esc_html__( 'Invalid should option called.', 'easy-plugins-display-posts' ),
-					$key
-				);
+				$value = $default;
 		}
 
 		return $value;
@@ -213,57 +147,15 @@ class Display_Posts {
 			return '';
 		}
 
-		$author                = self::get_option( 'author', $atts );
-		$author_id             = self::get_option( 'author_id', $atts );
-		$category              = self::get_option( 'category', $atts );
 		$category_display      = 'true' === $atts['category_display'] ? 'category' : sanitize_text_field( $atts['category_display'] );
-		$category_id           = self::get_option( 'category_id', $atts );
-		//$category_label        = self::get_option( 'category_label', $atts );
-		//$content_class         = self::get_option( 'content_class', $atts );
 		$date_format           = self::get_option( 'date_format', $atts );
-		$date                  = self::get_option( 'date', $atts );
-		$date_column           = self::get_option( 'date_column', $atts );
-		$date_compare          = self::get_option( 'date_compare', $atts );
-		$date_query_before     = self::get_option( 'date_query_before', $atts );
-		$date_query_after      = self::get_option( 'date_query_after', $atts );
-		$date_query_column     = self::get_option( 'date_query_column', $atts );
-		$date_query_compare    = self::get_option( 'date_query_compare', $atts );
 		$excerpt_length        = self::get_option( 'excerpt_length', $atts );
 		$excerpt_more          = self::get_option( 'excerpt_more', $atts );
 		$excerpt_more_link     = self::get_option( 'excerpt_more_link', $atts );
-		$exclude               = $atts['exclude']; // Sanitized later as an array of integers.
-		$exclude_current       = self::get_option( 'exclude_current', $atts );
-		$has_password          = null !== $atts['has_password'] ? filter_var( $atts['has_password'], FILTER_VALIDATE_BOOLEAN ) : null;
-		$id                    = $atts['id']; // Sanitized later as an array of integers.
-		//$ignore_sticky_posts   = self::get_option( 'ignore_sticky_posts', $atts );
 		$image_size            = self::get_option( 'image_size', $atts );
 		$include_title         = self::get_option( 'include_title', $atts );
-		//$include_author        = self::get_option( 'include_author', $atts );
-		//$include_content       = self::get_option( 'include_content', $atts );
-		//$include_date          = self::get_option( 'include_date', $atts );
-		//$include_date_modified = self::get_option( 'include_date_modified', $atts );
-		//$include_excerpt       = self::get_option( 'include_excerpt', $atts );
-		//$include_excerpt_dash  = self::get_option( 'include_excerpt_dash', $atts );
 		$include_link          = self::get_option( 'include_link', $atts );
-		$meta_key              = self::get_option( 'meta_key', $atts );
-		$meta_value            = self::get_option( 'meta_value', $atts );
 		$no_posts_message      = self::get_option( 'no_posts_message', $atts );
-		$offset                = self::get_option( 'offset', $atts );
-		$order                 = self::get_option( 'order', $atts );
-		$orderby               = self::get_option( 'orderby', $atts );
-		$post_parent           = $atts['post_parent']; // Validated later, after check for 'current'.
-		$post_parent__in       = $atts['post_parent__in'];
-		$post_parent__not_in   = $atts['post_parent__not_in'];
-		$post_status           = $atts['post_status']; // Validated later as one of a few values.
-		$post_type             = self::get_option( 'post_type', $atts );
-		$posts_per_page        = self::get_option( 'posts_per_page', $atts );
-		$s                     = self::get_option( 's', $atts );
-		$tag                   = self::get_option( 'tag', $atts );
-		$tax_operator          = $atts['tax_operator']; // Validated later as one of a few values.
-		$tax_include_children  = self::get_option( 'tax_include_children', $atts );
-		$tax_term              = self::get_option( 'tax_term', $atts );
-		$taxonomy              = self::get_option( 'taxonomy', $atts );
-		$time                  = self::get_option( 'time', $atts );
 		$shortcode_title       = self::get_option( 'title', $atts );
 		$wrapper               = self::get_option( 'wrapper', $atts );
 		$wrapper_class         = self::get_option( 'wrapper_class', $atts );
@@ -276,275 +168,6 @@ class Display_Posts {
 			$wrapper_id = ' id="' . $wrapper_id . '"';
 		}
 
-		// Set up initial query for post.
-		$args = array(
-			'perm' => 'readable',
-		);
-
-		// Add args if they aren't empty.
-		if ( ! empty( $category_id ) ) {
-			$args['cat'] = $category_id;
-		}
-		if ( ! empty( $category ) ) {
-			$args['category_name'] = $category;
-		}
-		if ( ! empty( $order ) ) {
-			$args['order'] = $order;
-		}
-		if ( ! empty( $orderby ) ) {
-			$args['orderby'] = $orderby;
-		}
-		if ( ! empty( $post_type ) ) {
-			$args['post_type'] = to_array( $post_type );
-		}
-		if ( ! empty( $posts_per_page ) ) {
-			$args['posts_per_page'] = $posts_per_page;
-		}
-		if ( ! empty( $s ) ) {
-			$args['s'] = $s;
-		}
-		if ( ! empty( $tag ) ) {
-			$args['tag'] = $tag;
-		}
-
-		// Date query.
-		if ( ! empty( $date ) || ! empty( $time ) || ! empty( $date_query_after ) || ! empty( $date_query_before ) ) {
-			$initial_date_query = array();
-			$date_query_top_lvl = array();
-
-			$valid_date_columns = array(
-				'post_date',
-				'post_date_gmt',
-				'post_modified',
-				'post_modified_gmt',
-				'comment_date',
-				'comment_date_gmt',
-			);
-
-			$valid_compare_ops = array( '=', '!=', '>', '>=', '<', '<=', 'IN', 'NOT IN', 'BETWEEN', 'NOT BETWEEN' );
-
-			// Sanitize and add date segments.
-			$dates = sanitize_date_time( $date );
-			if ( ! empty( $dates ) ) {
-				if ( is_string( $dates ) ) {
-					$timestamp = strtotime( $dates );
-					$dates     = array(
-						'year'  => date( 'Y', $timestamp ),
-						'month' => date( 'm', $timestamp ),
-						'day'   => date( 'd', $timestamp ),
-					);
-				}
-				foreach ( $dates as $arg => $segment ) {
-					$initial_date_query[ $arg ] = $segment;
-				}
-			}
-
-			// Sanitize and add time segments.
-			$times = sanitize_date_time( $time, 'time' );
-			if ( ! empty( $times ) ) {
-				foreach ( $times as $arg => $segment ) {
-					$initial_date_query[ $arg ] = $segment;
-				}
-			}
-
-			// Date query 'before' argument.
-			$before = sanitize_date_time( $date_query_before, 'date', true );
-			if ( ! empty( $before ) ) {
-				$initial_date_query['before'] = $before;
-			}
-
-			// Date query 'after' argument.
-			$after = sanitize_date_time( $date_query_after, 'date', true );
-			if ( ! empty( $after ) ) {
-				$initial_date_query['after'] = $after;
-			}
-
-			// Date query 'column' argument.
-			if ( ! empty( $date_query_column ) && in_array( $date_query_column, $valid_date_columns, true ) ) {
-				$initial_date_query['column'] = $date_query_column;
-			}
-
-			// Date query 'compare' argument.
-			if ( ! empty( $date_query_compare ) && in_array( $date_query_compare, $valid_compare_ops, true ) ) {
-				$initial_date_query['compare'] = $date_query_compare;
-			}
-
-			// Top-level date_query arguments. Only valid arguments will be added.
-			//
-			// 'column' argument.
-			if ( ! empty( $date_column ) && in_array( $date_column, $valid_date_columns, true ) ) {
-				$date_query_top_lvl['column'] = $date_column;
-			}
-
-			// 'compare' argument.
-			if ( ! empty( $date_compare ) && in_array( $date_compare, $valid_compare_ops, true ) ) {
-				$date_query_top_lvl['compare'] = $date_compare;
-			}
-
-			// Bring in the initial date query.
-			if ( ! empty( $initial_date_query ) ) {
-				$date_query_top_lvl[] = $initial_date_query;
-			}
-
-			// Date queries.
-			$args['date_query'] = $date_query_top_lvl;
-		}
-
-		// Ignore Sticky Posts.
-		if ( self::get_option( 'ignore_sticky_posts', $atts ) ) {
-			$args['ignore_sticky_posts'] = true;
-		}
-
-		// Password protected content.
-		if ( null !== $has_password ) {
-			$args['has_password'] = $has_password;
-		}
-
-		// Meta key (for ordering).
-		if ( ! empty( $meta_key ) ) {
-			$args['meta_key'] = $meta_key; // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_key
-		}
-
-		// Meta value (for simple meta queries).
-		if ( ! empty( $meta_value ) ) {
-			$args['meta_value'] = $meta_value; // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_value
-		}
-
-		// If Post IDs.
-		if ( $id ) {
-			$posts_in         = array_map( 'intval', to_array( $id ) );
-			$args['post__in'] = $posts_in;
-		}
-
-		// If Exclude.
-		$post__not_in = array();
-		if ( ! empty( $exclude ) ) {
-			$post__not_in = array_map( 'intval', to_array( $exclude ) );
-		}
-		if ( is_singular() && $exclude_current ) {
-			$post__not_in[] = get_the_ID();
-		}
-		if ( ! empty( $post__not_in ) ) {
-			$args['post__not_in'] = $post__not_in; // phpcs:ignore WordPressVIPMinimum.VIP.WPQueryParams.post__not_in
-		}
-
-		// Post Author.
-		if ( ! empty( $author ) ) {
-			if ( 'current' === $author && is_user_logged_in() ) {
-				$args['author_name'] = wp_get_current_user()->user_login;
-			} elseif ( 'current' === $author ) {
-				$args['meta_key'] = 'dps_no_results'; // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_key
-			} else {
-				$args['author_name'] = $author;
-			}
-		} elseif ( ! empty( $author_id ) ) {
-			$args['author'] = $author_id;
-		}
-
-		// Offset.
-		if ( ! empty( $offset ) ) {
-			$args['offset'] = $offset;
-		}
-
-		// Post Status.
-		$post_status = to_array( $post_status );
-		$validated   = array();
-		$available   = array( 'publish', 'pending', 'draft', 'auto-draft', 'future', 'private', 'inherit', 'trash', 'any' );
-		foreach ( $post_status as $unvalidated ) {
-			if ( in_array( $unvalidated, $available, true ) ) {
-				$validated[] = $unvalidated;
-			}
-		}
-		if ( ! empty( $validated ) ) {
-			$args['post_status'] = $validated;
-		}
-
-		// If taxonomy attributes, create a taxonomy query.
-		if ( ! empty( $taxonomy ) && ! empty( $tax_term ) ) {
-
-			if ( 'current' === $tax_term ) {
-				//global $post;
-				$terms    = wp_get_post_terms( get_the_ID(), $taxonomy );
-				$tax_term = array();
-				foreach ( $terms as $term ) {
-					$tax_term[] = $term->slug;
-				}
-			} else {
-				// Term string to array.
-				$tax_term = to_array( $tax_term );
-			}
-
-			// Validate operator.
-			if ( ! in_array( $tax_operator, array( 'IN', 'NOT IN', 'AND' ), true ) ) {
-				$tax_operator = 'IN';
-			}
-
-			$tax_args = array(
-				'tax_query' => array( // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_tax_query
-				                      array(
-					                      'taxonomy'         => $taxonomy,
-					                      'field'            => 'slug',
-					                      'terms'            => $tax_term,
-					                      'operator'         => $tax_operator,
-					                      'include_children' => $tax_include_children,
-				                      ),
-				),
-			);
-
-			// Check for multiple taxonomy queries.
-			$count            = 2;
-			$more_tax_queries = false;
-			while (
-				isset( $original_atts[ 'taxonomy_' . $count ] ) && ! empty( $original_atts[ 'taxonomy_' . $count ] ) &&
-				isset( $original_atts[ 'tax_' . $count . '_term' ] ) && ! empty( $original_atts[ 'tax_' . $count . '_term' ] )
-			) :
-
-				// Sanitize values.
-				$more_tax_queries     = true;
-				$taxonomy             = sanitize_key( $original_atts[ 'taxonomy_' . $count ] );
-				$terms                = to_array( sanitize_text_field( $original_atts[ 'tax_' . $count . '_term' ] ) );
-				$tax_operator         = isset( $original_atts[ 'tax_' . $count . '_operator' ] ) ? $original_atts[ 'tax_' . $count . '_operator' ] : 'IN';
-				$tax_operator         = in_array( $tax_operator, array( 'IN', 'NOT IN', 'AND' ), true ) ? $tax_operator : 'IN';
-				$tax_include_children = isset( $original_atts[ 'tax_' . $count . '_include_children' ] ) ? filter_var( $atts[ 'tax_' . $count . '_include_children' ], FILTER_VALIDATE_BOOLEAN ) : true;
-
-				$tax_args['tax_query'][] = array(
-					'taxonomy'         => $taxonomy,
-					'field'            => 'slug',
-					'terms'            => $terms,
-					'operator'         => $tax_operator,
-					'include_children' => $tax_include_children,
-				);
-
-				$count++;
-
-			endwhile;
-
-			if ( $more_tax_queries ) :
-				$tax_relation = 'AND';
-				if ( isset( $original_atts['tax_relation'] ) && in_array( $original_atts['tax_relation'], array( 'AND', 'OR' ), true ) ) {
-					$tax_relation = $original_atts['tax_relation'];
-				}
-				$args['tax_query']['relation'] = $tax_relation;
-			endif;
-
-			$args = array_merge_recursive( $args, $tax_args );
-		}
-
-		// If post parent attribute, set up parent.
-		if ( false !== $post_parent ) {
-			if ( 'current' === $post_parent ) {
-				$post_parent = get_the_ID();
-			}
-			$args['post_parent'] = (int) $post_parent;
-		}
-
-		if ( false !== $post_parent__in ) {
-			$args['post_parent__in'] = array_map( 'intval', to_array( $atts['post_parent__in'] ) );
-		}
-		if ( false !== $post_parent__not_in ) {
-			$args['post_parent__not_in'] = array_map( 'intval', to_array( $atts['post_parent__in'] ) );
-		}
-
 		// Set up html elements used to wrap the posts.
 		// Default is ul/li, but can also be ol/li and div/div.
 		$wrapper_options = array( 'ul', 'ol', 'div' );
@@ -553,20 +176,7 @@ class Display_Posts {
 		}
 		$inner_wrapper = 'div' === $wrapper ? 'div' : 'li';
 
-		/**
-		 * Filter the arguments passed to WP_Query.
-		 *
-		 * @since 1.0
-		 *
-		 * @param array $args          Parsed arguments to pass to WP_Query.
-		 * @param array $original_atts Original attributes passed to the shortcode.
-		 */
-		global $dps_listing;
-
-		$args = apply_filters_deprecated( 'display_posts_shortcode_args', array( $args, $original_atts ), '1.0', 'Easy_Plugins/Display_Posts/Query/Args' );
-		$args = apply_filters( 'Easy_Plugins/Display_Posts/Query/Args', $args, $original_atts );
-
-		$dps_listing = new WP_Query( $args );
+		$dps_listing = Query::run( $original_atts );
 
 		if ( ! $dps_listing->have_posts() ) {
 
