@@ -27,6 +27,8 @@ spl_autoload_register(
 		$registry = array(
 			'Easy_Plugins\Display_Posts\Query'                   => 'includes/class.query.php',
 			'Easy_Plugins\Display_Posts\Shortcode\Display_Posts' => 'includes/class.shortcode-display-posts.php',
+			'Easy_Plugins\Display_Posts\Cache'                   => 'includes/class.cache.php',
+			'Easy_Plugins\Display_Posts\Fragment'                => 'includes/class.cache.php',
 		);
 
 		if ( ! isset( $registry[ $class ] ) ) {
@@ -51,4 +53,9 @@ spl_autoload_register(
 require_once 'includes/inc.format.php';
 require_once 'includes/inc.functions.php';
 
-add_shortcode( 'display-posts', array( 'Easy_Plugins\Display_Posts\Shortcode\Display_Posts', 'render' ) );
+add_shortcode( 'display-posts', array( 'Easy_Plugins\Display_Posts\Shortcode\Display_Posts', 'cache' ) );
+add_action( 'save_post', array( 'Easy_Plugins\Display_Posts\Shortcode\Display_Posts', 'clear_cache' ) );
+add_action( 'created_term', array( 'Easy_Plugins\Display_Posts\Shortcode\Display_Posts', 'clear_cache' ) );
+add_action( 'edit_term', array( 'Easy_Plugins\Display_Posts\Shortcode\Display_Posts', 'clear_cache' ) );
+add_action( 'activated_plugin', array( 'Easy_Plugins\Display_Posts\Shortcode\Display_Posts', 'clear_cache' ) );
+add_action( 'deactivated_plugin', array( 'Easy_Plugins\Display_Posts\Shortcode\Display_Posts', 'clear_cache' ) );

@@ -2,6 +2,7 @@
 
 namespace Easy_Plugins\Display_Posts\Shortcode;
 
+use Easy_Plugins\Display_Posts\Cache;
 use Easy_Plugins\Display_Posts\Query;
 use WP_Post;
 use WP_Query;
@@ -109,6 +110,52 @@ class Display_Posts {
 	/**
 	 * Callback for the display-posts shortcode.
 	 *
+	 * Render from the transient cache or render new instance and save to the transient cache.
+	 *
+	 * @since 1.0
+	 *
+	 * @param array  $atts    User supplied attributes.
+	 * @param string $content The content enclosed within the shortcode.
+	 * @param array  $tag     The shortcode tag.
+	 *
+	 * @return string
+	 */
+	public static function cache( $atts, $content, $tag ) {
+
+		$key = hash( 'crc32b', json_encode( $atts ) );
+
+		// Pull in shortcode attributes and set defaults.
+		$atts = shortcode_atts( self::defaults(), $atts, $tag );
+
+		$fragment = Cache::get( $key, 'transient', 'ezpdp' );
+
+		if ( FALSE === $fragment ) {
+
+			ob_start();
+
+			echo self::render( $atts, $content, $tag );
+
+			$fragment = ob_get_clean();
+
+			Cache::set( $key, $fragment, WEEK_IN_SECONDS, 'transient', 'ezpdp' );
+		}
+
+		return $fragment;
+	}
+
+	/**
+	 * Callback for various actions to clear all shortcode instances from the cache.
+	 *
+	 * @since 1.0
+	 */
+	public static function clear_cache() {
+
+		Cache::clear( TRUE, 'transient', 'ezpdp' );
+	}
+
+	/**
+	 * Callback for the display-posts shortcode.
+	 *
 	 * To customize, use the following filters: https://displayposts.com/docs/filters/
 	 *
 	 * @param array  $atts    User supplied attributes.
@@ -139,8 +186,8 @@ class Display_Posts {
 		// Original attributes, for filters.
 		$original_atts = $atts;
 
-		// Pull in shortcode attributes and set defaults.
-		$atts = shortcode_atts( self::defaults(), $atts, $tag );
+		//// Pull in shortcode attributes and set defaults.
+		//$atts = shortcode_atts( self::defaults(), $atts, $tag );
 
 		// End early if shortcode should be turned off.
 		if ( $atts['display_posts_off'] ) {
