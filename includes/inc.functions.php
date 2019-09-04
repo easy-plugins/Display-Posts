@@ -114,7 +114,7 @@ function sanitize_date_time( $date_time, $type = 'date', $accepts_string = false
  * @param string $string String to split up.
  * @return array Array of string parts.
  */
-function to_array( $string = '' ) {
+function to_array( string $string = '' ) : array {
 	$string = str_replace( ', ', ',', $string );
 	return explode( ',', $string );
 }
@@ -129,7 +129,7 @@ function to_array( $string = '' ) {
  *
  * @return bool
  */
-function to_boolean( $value ) {
+function to_boolean( $value ) : bool {
 
 	// Already a bool, return it.
 	if ( is_bool( $value ) ) return $value;

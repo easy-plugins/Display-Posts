@@ -8,7 +8,7 @@ namespace Easy_Plugins\Display_Posts\Formatting;
  * @param int $date Unix timestamp.
  * @return string Human readable time difference.
  */
-function relative_date( $date ) {
+function relative_date( int $date ) : string {
 
 	return human_time_diff( $date ) . ' ' . __( 'ago', 'display-posts' );
 }

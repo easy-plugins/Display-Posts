@@ -50,7 +50,7 @@ class Query {
 	 *
 	 * @param array $args
 	 */
-	public function __construct( $args ) {
+	public function __construct( array $args ) {
 
 		$this->setup_query_options( $args );
 		$this->parse_query_args( $args );
@@ -63,7 +63,7 @@ class Query {
 	 *
 	 * @return WP_Query
 	 */
-	public function get_query_results() {
+	public function get_query_results() : WP_Query {
 
 		return $this->query;
 	}
@@ -75,7 +75,7 @@ class Query {
 	 *
 	 * @return WP_Query
 	 */
-	public static function run( $args ) {
+	public static function run( array $args ) : WP_Query{
 
 		$query = new static( $args );
 
@@ -92,7 +92,7 @@ class Query {
 	 *
 	 * @return array|bool|int|string
 	 */
-	private function get_option( $key, $default = NULL ) {
+	private function get_option( string $key, $default = NULL ) {
 
 		if ( ! array_key_exists( $key, $this->atts ) ) {
 
@@ -148,7 +148,7 @@ class Query {
 	 * @param string $key
 	 * @param mixed  $value
 	 */
-	public function add_query_arg( $key, $value ) {
+	public function add_query_arg( string $key, $value ) {
 
 		switch ( $key ) {
 
@@ -230,7 +230,7 @@ class Query {
 	 *
 	 * @param array $atts
 	 */
-	private function setup_query_options( $atts ) {
+	private function setup_query_options( array $atts ) {
 
 		$this->atts = $atts;
 	}
@@ -242,7 +242,7 @@ class Query {
 	 *
 	 * @param array $args
 	 */
-	private function parse_query_args( $args ) {
+	private function parse_query_args( array $args ) {
 
 		foreach ( $args as $key => $value ) {
 
@@ -303,7 +303,7 @@ class Query {
 	 *
 	 * @param array $args
 	 */
-	private function parse_post_author( $args ) {
+	private function parse_post_author( array $args ) {
 
 		if ( ! array_key_exists( 'author', $args ) ) {
 
@@ -335,7 +335,7 @@ class Query {
 	 *
 	 * @param array $args
 	 */
-	private function parse_post_id( $args ) {
+	private function parse_post_id( array $args ) {
 
 		if ( ! array_key_exists( 'id', $args ) ) {
 
@@ -354,7 +354,7 @@ class Query {
 	 *
 	 * @param array $args
 	 */
-	private function parse_exclude_posts( $args ) {
+	private function parse_exclude_posts( array $args ) {
 
 		if ( ! array_key_exists( 'exclude', $args ) ) {
 
@@ -388,7 +388,7 @@ class Query {
 	 *
 	 * @param array $args
 	 */
-	private function parse_post_status( $args ) {
+	private function parse_post_status( array $args ) {
 
 		if ( ! array_key_exists( 'post_status', $args ) ) {
 
@@ -438,7 +438,7 @@ class Query {
 	 *
 	 * @param array $args
 	 */
-	private function parse_post_parent( $args ) {
+	private function parse_post_parent( array $args ) {
 
 		if ( ! array_key_exists( 'post_parent', $args ) ) {
 
@@ -462,7 +462,7 @@ class Query {
 	 *
 	 * @param array $args
 	 */
-	private function setup_taxonomy_query( $args ) {
+	private function setup_taxonomy_query( array $args ) {
 
 		if ( ! array_key_exists( 'taxonomy', $args ) &&
 		     ! array_key_exists( 'tax_term', $args )) {

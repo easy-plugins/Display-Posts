@@ -50,7 +50,7 @@ class Display_Posts {
 	 *
 	 * @return array|bool|int|string|null
 	 */
-	private static function get_option( $key, $atts, $default = NULL ) {
+	private static function get_option( string $key, array $atts, $default = NULL ) {
 
 		if ( ! in_array( $key, self::defaults() ) ) {
 
@@ -120,7 +120,7 @@ class Display_Posts {
 	 *
 	 * @return string
 	 */
-	public static function cache( $atts, $content, $tag ) {
+	public static function cache( array $atts, string $content, string $tag ) : string {
 
 		$key = hash( 'crc32b', json_encode( $atts ) );
 
@@ -164,7 +164,7 @@ class Display_Posts {
 	 *
 	 * @return string
 	 */
-	public static function render( $atts, $content, $tag ) {
+	public static function render( array $atts, string $content, string $tag ) : string {
 
 		/**
 		 * Short circuit filter.
@@ -472,7 +472,7 @@ class Display_Posts {
 	 * @param array $atts  Original shortcode attributes.
 	 * @return array
 	 */
-	public static function ezp_display_posts_off( $out, $pairs, $atts ) {
+	public static function ezp_display_posts_off( array $out, array $pairs, array $atts ) : array {
 
 		$off = TRUE;
 
