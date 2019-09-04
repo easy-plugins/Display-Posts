@@ -160,7 +160,7 @@ class Display_Posts {
 	 *
 	 * @param array  $atts    User supplied attributes.
 	 * @param string $content The content enclosed within the shortcode.
-	 * @param array  $tag     The shortcode tag.
+	 * @param string $tag     The shortcode tag.
 	 *
 	 * @return string
 	 */
