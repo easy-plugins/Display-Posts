@@ -116,7 +116,7 @@ class Display_Posts {
 	 *
 	 * @param array  $atts    User supplied attributes.
 	 * @param string $content The content enclosed within the shortcode.
-	 * @param array  $tag     The shortcode tag.
+	 * @param string $tag     The shortcode tag.
 	 *
 	 * @return string
 	 */
@@ -470,6 +470,7 @@ class Display_Posts {
 	 * @param array $out   Returned shortcode values.
 	 * @param array $pairs List of supported attributes and their defaults.
 	 * @param array $atts  Original shortcode attributes.
+	 *
 	 * @return array
 	 */
 	public static function ezp_display_posts_off( array $out, array $pairs, array $atts ) : array {
