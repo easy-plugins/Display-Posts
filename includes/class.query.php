@@ -152,6 +152,26 @@ class Query {
 
 		switch ( $key ) {
 
+			case 'author':
+
+				$this->args['author_name'] = sanitize_text_field( $value );
+				break;
+
+			case 'author_id':
+
+				$this->args['author'] = absint( $value );
+				break;
+
+			case 'category':
+
+				$this->args['category_name'] = sanitize_text_field( $value );
+				break;
+
+			case 'category_id':
+
+				$this->args['cat'] = absint( $value );
+				break;
+
 			case 'date_query':
 
 				$this->args['date_query'] = $value;
@@ -195,8 +215,6 @@ class Query {
 				$this->args['post_type'] = to_array( sanitize_text_field( $value ) );
 				break;
 
-			case 'author_id':
-			case 'category_id':
 			case 'offset':
 			case 'post_parent':
 			case 'posts_per_page':
@@ -204,8 +222,6 @@ class Query {
 				$this->args[ $key ] = absint( $value );
 				break;
 
-			case 'author':
-			case 'category':
 			case 'meta_key':
 			case 'meta_value':
 			case 's':
