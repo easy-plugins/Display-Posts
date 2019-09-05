@@ -114,26 +114,24 @@ class Display_Posts {
 	 *
 	 * @since 1.0
 	 *
-	 * @param array  $atts    User supplied attributes.
+	 * @param array  $untrusted   User supplied attributes.
 	 * @param string $content The content enclosed within the shortcode.
 	 * @param string $tag     The shortcode tag.
 	 *
 	 * @return string
 	 */
-	public static function cache( array $atts, string $content, string $tag ) : string {
+	public static function cache( array $untrusted, string $content, string $tag ) : string {
 
-		$key = hash( 'crc32b', json_encode( $atts ) );
-
-		// Pull in shortcode attributes and set defaults.
-		$atts = shortcode_atts( self::defaults(), $atts, $tag );
+		$key = hash( 'crc32b', json_encode( $untrusted ) );
 
 		$fragment = Cache::get( $key, 'transient', 'ezpdp' );
+		$fragment = FALSE;
 
 		if ( FALSE === $fragment ) {
 
 			ob_start();
 
-			echo self::render( $atts, $content, $tag );
+			echo self::render( $untrusted, $content, $tag );
 
 			$fragment = ob_get_clean();
 
@@ -158,13 +156,13 @@ class Display_Posts {
 	 *
 	 * To customize, use the following filters: https://displayposts.com/docs/filters/
 	 *
-	 * @param array  $atts    User supplied attributes.
-	 * @param string $content The content enclosed within the shortcode.
-	 * @param string $tag     The shortcode tag.
+	 * @param array  $untrusted User supplied attributes.
+	 * @param string $content   The content enclosed within the shortcode.
+	 * @param string $tag       The shortcode tag.
 	 *
 	 * @return string
 	 */
-	public static function render( array $atts, string $content, string $tag ) : string {
+	public static function render( array $untrusted, string $content, string $tag ) : string {
 
 		/**
 		 * Short circuit filter.
@@ -174,20 +172,17 @@ class Display_Posts {
 		 * @since 1.0
 		 *
 		 * @param bool  $short_circuit False to allow this function to continue, anything else to return that value.
-		 * @param array $atts          Shortcode attributes.
+		 * @param array $untrusted     Shortcode attributes.
 		 */
 		$output = apply_filters_deprecated( 'pre_display_posts_shortcode_output', array( FALSE ), '1.0', 'Easy_Plugins/Display_Posts/Render' );
-		$output = apply_filters( 'Easy_Plugins/Display_Posts/Render', $output, $atts );
+		$output = apply_filters( 'Easy_Plugins/Display_Posts/Render', $output, $untrusted );
 
 		if ( false !== $output ) {
 			return $output;
 		}
 
-		// Original attributes, for filters.
-		$original_atts = $atts;
-
-		//// Pull in shortcode attributes and set defaults.
-		//$atts = shortcode_atts( self::defaults(), $atts, $tag );
+		// Pull in shortcode attributes and set defaults.
+		$atts = shortcode_atts( self::defaults(), $untrusted, $tag );
 
 		// End early if shortcode should be turned off.
 		if ( $atts['display_posts_off'] ) {
@@ -223,7 +218,7 @@ class Display_Posts {
 		}
 		$inner_wrapper = 'div' === $wrapper ? 'div' : 'li';
 
-		$dps_listing = Query::run( $original_atts );
+		$dps_listing = Query::run( $untrusted );
 
 		if ( ! $dps_listing->have_posts() ) {
 
@@ -280,9 +275,9 @@ class Display_Posts {
 			 * @param string $image         HTML markup to display post image.
 			 * @param string $image_size    The image size to display.
 			 * @param bool   $include_link  Whether or not to display the image as the post permalink.
-			 * @param array  $original_atts Original attributes passed to the shortcode.
+			 * @param array  $untrusted     Original attributes passed to the shortcode.
 			 */
-			$image = apply_filters( 'Easy_Plugins/Display_Posts/Post/Image', $image, $image_size, $include_link, $original_atts );
+			$image = apply_filters( 'Easy_Plugins/Display_Posts/Post/Image', $image, $image_size, $include_link, $untrusted );
 
 			if ( self::get_option( 'include_date', $atts ) ) {
 				$date = 'relative' === $date_format ? relative_date( get_the_date( 'U' ) ) : get_the_date( $date_format );
@@ -304,8 +299,8 @@ class Display_Posts {
 				 *
 				 * @param string $author_output HTML markup to display author information.
 				 */
-				$author = apply_filters_deprecated( 'display_posts_shortcode_author', array( $author, $original_atts ), '1.0', 'Easy_Plugins/Display_Posts/Post/Author' );
-				$author = apply_filters( 'Easy_Plugins/Display_Posts/Post/Author', $author, $original_atts );
+				$author = apply_filters_deprecated( 'display_posts_shortcode_author', array( $author, $untrusted ), '1.0', 'Easy_Plugins/Display_Posts/Post/Author' );
+				$author = apply_filters( 'Easy_Plugins/Display_Posts/Post/Author', $author, $untrusted );
 			}
 
 			if ( self::get_option( 'include_excerpt', $atts ) ) {
@@ -370,8 +365,8 @@ class Display_Posts {
 				 *
 				 * @param string   $category_display Current Category Display text
 				 */
-				$category_display_text = apply_filters_deprecated( 'display_posts_shortcode_category_display', array( $category_display_text, $terms, $category_display, $original_atts ), '1.0', 'Easy_Plugins/Display_Posts/Post/Categories' );
-				$category_display_text = apply_filters( 'Easy_Plugins/Display_Posts/Post/Categories', $category_display_text, $terms, $category_display, $original_atts );
+				$category_display_text = apply_filters_deprecated( 'display_posts_shortcode_category_display', array( $category_display_text, $terms, $category_display, $untrusted ), '1.0', 'Easy_Plugins/Display_Posts/Post/Categories' );
+				$category_display_text = apply_filters( 'Easy_Plugins/Display_Posts/Post/Categories', $category_display_text, $terms, $category_display, $untrusted );
 			}
 
 			$class = array( 'listing-item' );
@@ -381,13 +376,13 @@ class Display_Posts {
 			 *
 			 * @since 1.0
 			 *
-			 * @param array    $class         Post classes.
-			 * @param WP_Post  $post          Post object.
-			 * @param WP_Query $dps_listing       WP_Query object for the posts listing.
-			 * @param array    $original_atts Original attributes passed to the shortcode.
+			 * @param array    $class       Post classes.
+			 * @param WP_Post  $post        Post object.
+			 * @param WP_Query $dps_listing WP_Query object for the posts listing.
+			 * @param array    $untrusted   Original attributes passed to the shortcode.
 			 */
-			$class = apply_filters_deprecated( 'display_posts_shortcode_post_class', array( $class, $post, $dps_listing, $original_atts ), '1.0', 'Easy_Plugins/Display_Posts/Post/Class' );
-			$class = apply_filters( 'Easy_Plugins/Display_Posts/Post/Class', $class, $post, $dps_listing, $original_atts );
+			$class = apply_filters_deprecated( 'display_posts_shortcode_post_class', array( $class, $post, $dps_listing, $untrusted ), '1.0', 'Easy_Plugins/Display_Posts/Post/Class' );
+			$class = apply_filters( 'Easy_Plugins/Display_Posts/Post/Class', $class, $post, $dps_listing, $untrusted );
 
 			$class  = array_map( 'sanitize_html_class', $class );
 			$output = '<' . $inner_wrapper . ' class="' . implode( ' ', $class ) . '">' . $image . $title . $date . $author . $category_display_text . $excerpt . $content . '</' . $inner_wrapper . '>';
@@ -398,7 +393,7 @@ class Display_Posts {
 			 * @since 1.0
 			 *
 			 * @param string $output        The shortcode's HTML output.
-			 * @param array  $original_atts Original attributes passed to the shortcode.
+			 * @param array  $untrusted     Original attributes passed to the shortcode.
 			 * @param string $image         HTML markup for the post's featured image element.
 			 * @param string $title         HTML markup for the post's title element.
 			 * @param string $date          HTML markup for the post's date element.
@@ -409,8 +404,8 @@ class Display_Posts {
 			 * @param string $author        HTML markup for the post's author.
 			 * @param string $category_display_text
 			 */
-			$output = apply_filters_deprecated( 'display_posts_shortcode_output', array( $output, $original_atts, $image, $title, $date, $excerpt, $inner_wrapper, $content, $class, $author, $category_display_text ), '1.0', 'Easy_Plugins/Display_Posts/Post/HTML' );
-			$inner .= apply_filters( 'Easy_Plugins/Display_Posts/Post/HTML', $output, $original_atts, $image, $title, $date, $excerpt, $inner_wrapper, $content, $class, $author, $category_display_text );
+			$output = apply_filters_deprecated( 'display_posts_shortcode_output', array( $output, $untrusted, $image, $title, $date, $excerpt, $inner_wrapper, $content, $class, $author, $category_display_text ), '1.0', 'Easy_Plugins/Display_Posts/Post/HTML' );
+			$inner .= apply_filters( 'Easy_Plugins/Display_Posts/Post/HTML', $output, $untrusted, $image, $title, $date, $excerpt, $inner_wrapper, $content, $class, $author, $category_display_text );
 
 		endwhile;
 		wp_reset_postdata();
@@ -420,12 +415,12 @@ class Display_Posts {
 		 *
 		 * @since 1.0
 		 *
-		 * @param string $wrapper_open  HTML markup for the opening outer wrapper element.
-		 * @param array  $original_atts Original attributes passed to the shortcode.
-		 * @param object $dps_listing, WP Query object
+		 * @param string $wrapper_open HTML markup for the opening outer wrapper element.
+		 * @param array  $untrusted    Original attributes passed to the shortcode.
+		 * @param object $dps_listing  WP Query object
 		 */
-		$open = apply_filters_deprecated( 'display_posts_shortcode_wrapper_open', array( '<' . $wrapper . $wrapper_class . $wrapper_id . '>', $original_atts, $dps_listing ), '1.0', 'Easy_Plugins/Display_Posts/HTML/Wrap_Open' );
-		$open = apply_filters( 'Easy_Plugins/Display_Posts/HTML/Wrap_Open', $open, $original_atts, $dps_listing );
+		$open = apply_filters_deprecated( 'display_posts_shortcode_wrapper_open', array( '<' . $wrapper . $wrapper_class . $wrapper_id . '>', $untrusted, $dps_listing ), '1.0', 'Easy_Plugins/Display_Posts/HTML/Wrap_Open' );
+		$open = apply_filters( 'Easy_Plugins/Display_Posts/HTML/Wrap_Open', $open, $untrusted, $dps_listing );
 
 		/**
 		 * Filter the shortcode output's closing outer wrapper element.
@@ -433,11 +428,11 @@ class Display_Posts {
 		 * @since 1.0
 		 *
 		 * @param string $wrapper_close HTML markup for the closing outer wrapper element.
-		 * @param array  $original_atts Original attributes passed to the shortcode.
-		 * @param object $dps_listing, WP Query object
+		 * @param array  $untrusted     Original attributes passed to the shortcode.
+		 * @param object $dps_listing   WP Query object
 		 */
-		$close = apply_filters_deprecated( 'display_posts_shortcode_wrapper_close', array( '</' . $wrapper . '>', $original_atts, $dps_listing ), '1.0', 'Easy_Plugins/Display_Posts/HTML/Wrap_Close' );
-		$close = apply_filters( 'Easy_Plugins/Display_Posts/HTML/Wrap_Close', $close, $original_atts, $dps_listing );
+		$close = apply_filters_deprecated( 'display_posts_shortcode_wrapper_close', array( '</' . $wrapper . '>', $untrusted, $dps_listing ), '1.0', 'Easy_Plugins/Display_Posts/HTML/Wrap_Close' );
+		$close = apply_filters( 'Easy_Plugins/Display_Posts/HTML/Wrap_Close', $close, $untrusted, $dps_listing );
 
 		$return = '';
 
@@ -448,11 +443,11 @@ class Display_Posts {
 			 *
 			 * @since 1.0
 			 *
-			 * @param string $tag           Type of element to use for the output title tag. Default 'h2'.
-			 * @param array  $original_atts Original attributes passed to the shortcode.
+			 * @param string $tag       Type of element to use for the output title tag. Default 'h2'.
+			 * @param array  $untrusted Original attributes passed to the shortcode.
 			 */
-			$title_tag = apply_filters_deprecated( 'display_posts_shortcode_title_tag', array( 'h2', $original_atts ), '1.0', 'Easy_Plugins/Display_Posts/Posts/HTML/Title_Tag' );
-			$title_tag = apply_filters( 'Easy_Plugins/Display_Posts/Posts/HTML/Title_Tag', $title_tag, $original_atts );
+			$title_tag = apply_filters_deprecated( 'display_posts_shortcode_title_tag', array( 'h2', $untrusted ), '1.0', 'Easy_Plugins/Display_Posts/Posts/HTML/Title_Tag' );
+			$title_tag = apply_filters( 'Easy_Plugins/Display_Posts/Posts/HTML/Title_Tag', $title_tag, $untrusted );
 
 			$return .= '<' . $title_tag . ' class="display-posts-title">' . $shortcode_title . '</' . $title_tag . '>' . "\n";
 		}
