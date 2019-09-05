@@ -54,8 +54,8 @@ require_once 'includes/inc.format.php';
 require_once 'includes/inc.functions.php';
 
 add_shortcode( 'display-posts', array( 'Easy_Plugins\Display_Posts\Shortcode\Display_Posts', 'cache' ) );
-add_action( 'save_post', array( 'Easy_Plugins\Display_Posts\Shortcode\Display_Posts', 'clear_cache' ) );
-add_action( 'created_term', array( 'Easy_Plugins\Display_Posts\Shortcode\Display_Posts', 'clear_cache' ) );
-add_action( 'edit_term', array( 'Easy_Plugins\Display_Posts\Shortcode\Display_Posts', 'clear_cache' ) );
-add_action( 'activated_plugin', array( 'Easy_Plugins\Display_Posts\Shortcode\Display_Posts', 'clear_cache' ) );
-add_action( 'deactivated_plugin', array( 'Easy_Plugins\Display_Posts\Shortcode\Display_Posts', 'clear_cache' ) );
+//add_action( 'save_post', array( 'Easy_Plugins\Display_Posts\Shortcode\Display_Posts', 'clear_cache' ) );
+//add_action( 'created_term', array( 'Easy_Plugins\Display_Posts\Shortcode\Display_Posts', 'clear_cache' ) );
+//add_action( 'edit_term', array( 'Easy_Plugins\Display_Posts\Shortcode\Display_Posts', 'clear_cache' ) );
+//add_action( 'activated_plugin', array( 'Easy_Plugins\Display_Posts\Shortcode\Display_Posts', 'clear_cache' ) );
+//add_action( 'deactivated_plugin', array( 'Easy_Plugins\Display_Posts\Shortcode\Display_Posts', 'clear_cache' ) );
