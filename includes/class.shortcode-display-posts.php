@@ -236,22 +236,22 @@ class Display_Posts {
 	public function render() : string {
 
 		// End early if shortcode should be turned off.
-		if ( $this->atts['display_posts_off'] ) {
+		if ( $this->get_option( 'display_posts_off' ) ) {
 			return '';
 		}
 
 		$category_display      = 'true' === $this->atts['category_display'] ? 'category' : sanitize_text_field( $this->atts['category_display'] );
-		$date_format           = self::get_option( 'date_format' );
-		$excerpt_length        = self::get_option( 'excerpt_length' );
-		$excerpt_more          = self::get_option( 'excerpt_more' );
-		$excerpt_more_link     = self::get_option( 'excerpt_more_link' );
-		$image_size            = self::get_option( 'image_size' );
-		$include_title         = self::get_option( 'include_title' );
-		$include_link          = self::get_option( 'include_link' );
-		$no_posts_message      = self::get_option( 'no_posts_message' );
-		$shortcode_title       = self::get_option( 'title' );
-		$wrapper               = self::get_option( 'wrapper' );
-		$wrapper_class         = self::get_option( 'wrapper_class' );
+		$date_format           = $this->get_option( 'date_format' );
+		$excerpt_length        = $this->get_option( 'excerpt_length' );
+		$excerpt_more          = $this->get_option( 'excerpt_more' );
+		$excerpt_more_link     = $this->get_option( 'excerpt_more_link' );
+		$image_size            = $this->get_option( 'image_size' );
+		$include_title         = $this->get_option( 'include_title' );
+		$include_link          = $this->get_option( 'include_link' );
+		$no_posts_message      = $this->get_option( 'no_posts_message' );
+		$shortcode_title       = $this->get_option( 'title' );
+		$wrapper               = $this->get_option( 'wrapper' );
+		$wrapper_class         = $this->get_option( 'wrapper_class' );
 
 		if ( ! empty( $wrapper_class ) ) {
 			$wrapper_class = ' class="' . implode( ' ', $wrapper_class ) . '"';
@@ -330,16 +330,16 @@ class Display_Posts {
 			 */
 			$image = apply_filters( 'Easy_Plugins/Display_Posts/Post/Image', $image, $image_size, $include_link, $this->untrusted );
 
-			if ( self::get_option( 'include_date' ) ) {
+			if ( $this->get_option( 'include_date' ) ) {
 				$date = 'relative' === $date_format ? relative_date( get_the_date( 'U' ) ) : get_the_date( $date_format );
-			} elseif ( self::get_option( 'include_date_modified' ) ) {
+			} elseif ( $this->get_option( 'include_date_modified' ) ) {
 				$date = 'relative' === $date_format ? relative_date( get_the_modified_time( 'U' ) ) : get_the_modified_date( $date_format );
 			}
 			if ( ! empty( $date ) ) {
 				$date = ' <span class="date">' . $date . '</span>';
 			}
 
-			if ( self::get_option( 'include_author' ) ) {
+			if ( $this->get_option( 'include_author' ) ) {
 
 				$author = ' <span class="author">by ' . get_the_author() . '</span>';
 
@@ -354,7 +354,7 @@ class Display_Posts {
 				$author = apply_filters( 'Easy_Plugins/Display_Posts/Post/Author', $author, $this->untrusted );
 			}
 
-			if ( self::get_option( 'include_excerpt' ) ) {
+			if ( $this->get_option( 'include_excerpt' ) ) {
 
 				// Custom build excerpt based on shortcode parameters.
 				if ( $excerpt_length || $excerpt_more || $excerpt_more_link ) {
@@ -382,16 +382,16 @@ class Display_Posts {
 				if ( ! empty( $excerpt ) ) {
 
 					$excerpt = ' <span class="excerpt">' . $excerpt . '</span>';
-					if ( self::get_option( 'include_excerpt_dash' ) ) {
+					if ( $this->get_option( 'include_excerpt_dash' ) ) {
 						$excerpt = ' <span class="excerpt-dash">-</span>' . $excerpt;
 					}
 				}
 			}
 
-			if ( self::get_option( 'include_content' ) ) {
+			if ( $this->get_option( 'include_content' ) ) {
 				add_filter( 'shortcode_atts_display-posts', array( __CLASS__, 'ezp_display_posts_off' ), 10, 3 );
 				/** This filter is documented in wp-includes/post-template.php */
-				$content = '<div class="' . implode( ' ', self::get_option( 'content_class' ) ) . '">' . apply_filters( 'the_content', get_the_content() ) . '</div>';
+				$content = '<div class="' . implode( ' ', $this->get_option( 'content_class' ) ) . '">' . apply_filters( 'the_content', get_the_content() ) . '</div>';
 				remove_filter( 'shortcode_atts_display-posts', array( __CLASS__, 'ezp_display_posts_off' ), 10 );
 			}
 
@@ -406,7 +406,7 @@ class Display_Posts {
 					foreach ( $terms as $term ) {
 						$term_output[] = '<a href="' . get_term_link( $term, $category_display ) . '">' . $term->name . '</a>';
 					}
-					$category_display_text = ' <span class="category-display"><span class="category-display-label">' . self::get_option( 'category_label' ) . '</span> ' . implode( ', ', $term_output ) . '</span>';
+					$category_display_text = ' <span class="category-display"><span class="category-display-label">' . $this->get_option( 'category_label' ) . '</span> ' . implode( ', ', $term_output ) . '</span>';
 				}
 
 				/**
