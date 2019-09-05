@@ -59,6 +59,24 @@ class Display_Posts {
 			$untrusted = array();
 		}
 
+		/**
+		 * Short circuit filter.
+		 *
+		 * Use this filter to return from this function immediately, with the return of the filter callback.
+		 *
+		 * @since 1.0
+		 *
+		 * @param bool  $short_circuit False to allow this function to continue, anything else to return that value.
+		 * @param array $untrusted     Shortcode attributes.
+		 */
+		$render = apply_filters_deprecated( 'pre_display_posts_shortcode_output', array( FALSE ), '1.0', 'Easy_Plugins/Display_Posts/Render' );
+		$render = apply_filters( 'Easy_Plugins/Display_Posts/Render', $render, $untrusted );
+
+		if ( FALSE !== $render ) {
+
+			return '';
+		}
+
 		$shortcode = new static( $untrusted, $content, $tag );
 
 		return $shortcode->render();
@@ -216,23 +234,6 @@ class Display_Posts {
 	 * @return string
 	 */
 	public function render() : string {
-
-		/**
-		 * Short circuit filter.
-		 *
-		 * Use this filter to return from this function immediately, with the return of the filter callback.
-		 *
-		 * @since 1.0
-		 *
-		 * @param bool  $short_circuit False to allow this function to continue, anything else to return that value.
-		 * @param array $untrusted     Shortcode attributes.
-		 */
-		$output = apply_filters_deprecated( 'pre_display_posts_shortcode_output', array( FALSE ), '1.0', 'Easy_Plugins/Display_Posts/Render' );
-		$output = apply_filters( 'Easy_Plugins/Display_Posts/Render', $output, $this->untrusted );
-
-		if ( false !== $output ) {
-			return $output;
-		}
 
 		// End early if shortcode should be turned off.
 		if ( $this->atts['display_posts_off'] ) {
