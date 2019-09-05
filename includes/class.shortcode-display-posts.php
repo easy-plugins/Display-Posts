@@ -11,11 +11,65 @@ use function Easy_Plugins\Display_Posts\Formatting\{relative_date};
 
 class Display_Posts {
 
-	protected function __construct() {
-		// Intentionally Left blank.
+	/**
+	 * @since 1.0
+	 * @var array
+	 */
+	private $atts = array();
+
+	/**
+	 * @since 1.0
+	 * @var array
+	 */
+	private $untrusted = array();
+
+	/**
+	 * Display_Posts constructor.
+	 *
+	 * @since 1.0
+	 *
+	 * @param array  $untrusted   User supplied attributes.
+	 * @param string $content     The content enclosed within the shortcode.
+	 * @param string $tag         The shortcode tag.
+	 */
+	protected function __construct( array $untrusted, string $content, string $tag ) {
+
+		$this->untrusted = $untrusted;
+
+		// Pull in shortcode attributes and set defaults.
+		$this->atts = shortcode_atts( self::defaults(), $untrusted, $tag );
 	}
 
-	public static function defaults() {
+	/**
+	 * Callback for the display-posts shortcode.
+	 *
+	 * To customize, use the following filters: https://displayposts.com/docs/filters/
+	 *
+	 * @param array  $untrusted User supplied attributes.
+	 * @param string $content   The content enclosed within the shortcode.
+	 * @param string $tag       The shortcode tag.
+	 *
+	 * @return string
+	 */
+	public static function run( $untrusted, string $content, string $tag ) : string {
+
+		// If no shortcode options are set, the $untrusted will be an empty string.
+		if ( ! is_array( $untrusted ) ) {
+
+			$untrusted = array();
+		}
+
+		$shortcode = new static( $untrusted, $content, $tag );
+
+		return $shortcode->render();
+	}
+
+	/**
+	 * @since 1.0
+	 *
+	 * @return array
+	 */
+	public function defaults() {
 
 		return array(
 			'category_display'      => '',
@@ -44,13 +98,14 @@ class Display_Posts {
 	}
 
 	/**
+	 * @since 1.0
+	 *
 	 * @param string $key
-	 * @param array  $atts
 	 * @param null   $default
 	 *
 	 * @return array|bool|int|string|null
 	 */
-	private static function get_option( string $key, array $atts, $default = NULL ) {
+	private function get_option( string $key, $default = NULL ) {
 
 		if ( ! in_array( $key, self::defaults() ) ) {
 
@@ -66,7 +121,7 @@ class Display_Posts {
 			case 'title':
 			case 'wrapper':
 
-				$value = sanitize_text_field( $atts[ $key ] );
+				$value = sanitize_text_field( $this->atts[ $key ] );
 				break;
 
 			case 'display_posts_off':
@@ -80,23 +135,23 @@ class Display_Posts {
 			case 'include_link':
 			case 'include_title':
 
-				$value = to_boolean( $atts[ $key ] );
+				$value = to_boolean( $this->atts[ $key ] );
 				break;
 
 			case 'excerpt_length':
 
-				$value = absint( $atts[ $key ] );
+				$value = absint( $this->atts[ $key ] );
 				break;
 
 			case 'image_size':
 
-			$value = sanitize_key( $atts[ $key ] );
+			$value = sanitize_key( $this->atts[ $key ] );
 				break;
 
 			case 'content_class':
 			case 'wrapper_class':
 
-				$value = array_map( 'sanitize_html_class', explode( ' ', $atts[ $key ] ) );
+				$value = array_map( 'sanitize_html_class', explode( ' ', $this->atts[ $key ] ) );
 				break;
 
 			default:
@@ -120,7 +175,7 @@ class Display_Posts {
 	 *
 	 * @return string
 	 */
-	public static function cache( array $untrusted, string $content, string $tag ) : string {
+	public function cache( array $untrusted, string $content, string $tag ) : string {
 
 		$key = hash( 'crc32b', json_encode( $untrusted ) );
 
@@ -131,7 +186,7 @@ class Display_Posts {
 
 			ob_start();
 
-			echo self::render( $untrusted, $content, $tag );
+			echo self::run( $untrusted, $content, $tag );
 
 			$fragment = ob_get_clean();
 
@@ -152,17 +207,15 @@ class Display_Posts {
 	}
 
 	/**
-	 * Callback for the display-posts shortcode.
+	 * Render the display-posts shortcode.
 	 *
 	 * To customize, use the following filters: https://displayposts.com/docs/filters/
 	 *
-	 * @param array  $untrusted User supplied attributes.
-	 * @param string $content   The content enclosed within the shortcode.
-	 * @param string $tag       The shortcode tag.
+	 * @since 1.0
 	 *
 	 * @return string
 	 */
-	public static function render( array $untrusted, string $content, string $tag ) : string {
+	public function render() : string {
 
 		/**
 		 * Short circuit filter.
@@ -175,37 +228,34 @@ class Display_Posts {
 		 * @param array $untrusted     Shortcode attributes.
 		 */
 		$output = apply_filters_deprecated( 'pre_display_posts_shortcode_output', array( FALSE ), '1.0', 'Easy_Plugins/Display_Posts/Render' );
-		$output = apply_filters( 'Easy_Plugins/Display_Posts/Render', $output, $untrusted );
+		$output = apply_filters( 'Easy_Plugins/Display_Posts/Render', $output, $this->untrusted );
 
 		if ( false !== $output ) {
 			return $output;
 		}
 
-		// Pull in shortcode attributes and set defaults.
-		$atts = shortcode_atts( self::defaults(), $untrusted, $tag );
-
 		// End early if shortcode should be turned off.
-		if ( $atts['display_posts_off'] ) {
+		if ( $this->atts['display_posts_off'] ) {
 			return '';
 		}
 
-		$category_display      = 'true' === $atts['category_display'] ? 'category' : sanitize_text_field( $atts['category_display'] );
-		$date_format           = self::get_option( 'date_format', $atts );
-		$excerpt_length        = self::get_option( 'excerpt_length', $atts );
-		$excerpt_more          = self::get_option( 'excerpt_more', $atts );
-		$excerpt_more_link     = self::get_option( 'excerpt_more_link', $atts );
-		$image_size            = self::get_option( 'image_size', $atts );
-		$include_title         = self::get_option( 'include_title', $atts );
-		$include_link          = self::get_option( 'include_link', $atts );
-		$no_posts_message      = self::get_option( 'no_posts_message', $atts );
-		$shortcode_title       = self::get_option( 'title', $atts );
-		$wrapper               = self::get_option( 'wrapper', $atts );
-		$wrapper_class         = self::get_option( 'wrapper_class', $atts );
+		$category_display      = 'true' === $this->atts['category_display'] ? 'category' : sanitize_text_field( $this->atts['category_display'] );
+		$date_format           = self::get_option( 'date_format' );
+		$excerpt_length        = self::get_option( 'excerpt_length' );
+		$excerpt_more          = self::get_option( 'excerpt_more' );
+		$excerpt_more_link     = self::get_option( 'excerpt_more_link' );
+		$image_size            = self::get_option( 'image_size' );
+		$include_title         = self::get_option( 'include_title' );
+		$include_link          = self::get_option( 'include_link' );
+		$no_posts_message      = self::get_option( 'no_posts_message' );
+		$shortcode_title       = self::get_option( 'title' );
+		$wrapper               = self::get_option( 'wrapper' );
+		$wrapper_class         = self::get_option( 'wrapper_class' );
 
 		if ( ! empty( $wrapper_class ) ) {
 			$wrapper_class = ' class="' . implode( ' ', $wrapper_class ) . '"';
 		}
-		$wrapper_id = sanitize_html_class( $atts['wrapper_id'] );
+		$wrapper_id = sanitize_html_class( $this->atts['wrapper_id'] );
 		if ( ! empty( $wrapper_id ) ) {
 			$wrapper_id = ' id="' . $wrapper_id . '"';
 		}
@@ -218,7 +268,7 @@ class Display_Posts {
 		}
 		$inner_wrapper = 'div' === $wrapper ? 'div' : 'li';
 
-		$dps_listing = Query::run( $untrusted );
+		$dps_listing = Query::run( $this->untrusted );
 
 		if ( ! $dps_listing->have_posts() ) {
 
@@ -277,18 +327,18 @@ class Display_Posts {
 			 * @param bool   $include_link  Whether or not to display the image as the post permalink.
 			 * @param array  $untrusted     Original attributes passed to the shortcode.
 			 */
-			$image = apply_filters( 'Easy_Plugins/Display_Posts/Post/Image', $image, $image_size, $include_link, $untrusted );
+			$image = apply_filters( 'Easy_Plugins/Display_Posts/Post/Image', $image, $image_size, $include_link, $this->untrusted );
 
-			if ( self::get_option( 'include_date', $atts ) ) {
+			if ( self::get_option( 'include_date' ) ) {
 				$date = 'relative' === $date_format ? relative_date( get_the_date( 'U' ) ) : get_the_date( $date_format );
-			} elseif ( self::get_option( 'include_date_modified', $atts ) ) {
+			} elseif ( self::get_option( 'include_date_modified' ) ) {
 				$date = 'relative' === $date_format ? relative_date( get_the_modified_time( 'U' ) ) : get_the_modified_date( $date_format );
 			}
 			if ( ! empty( $date ) ) {
 				$date = ' <span class="date">' . $date . '</span>';
 			}
 
-			if ( self::get_option( 'include_author', $atts ) ) {
+			if ( self::get_option( 'include_author' ) ) {
 
 				$author = ' <span class="author">by ' . get_the_author() . '</span>';
 
@@ -299,11 +349,11 @@ class Display_Posts {
 				 *
 				 * @param string $author_output HTML markup to display author information.
 				 */
-				$author = apply_filters_deprecated( 'display_posts_shortcode_author', array( $author, $untrusted ), '1.0', 'Easy_Plugins/Display_Posts/Post/Author' );
-				$author = apply_filters( 'Easy_Plugins/Display_Posts/Post/Author', $author, $untrusted );
+				$author = apply_filters_deprecated( 'display_posts_shortcode_author', array( $author, $this->untrusted ), '1.0', 'Easy_Plugins/Display_Posts/Post/Author' );
+				$author = apply_filters( 'Easy_Plugins/Display_Posts/Post/Author', $author, $this->untrusted );
 			}
 
-			if ( self::get_option( 'include_excerpt', $atts ) ) {
+			if ( self::get_option( 'include_excerpt' ) ) {
 
 				// Custom build excerpt based on shortcode parameters.
 				if ( $excerpt_length || $excerpt_more || $excerpt_more_link ) {
@@ -331,16 +381,16 @@ class Display_Posts {
 				if ( ! empty( $excerpt ) ) {
 
 					$excerpt = ' <span class="excerpt">' . $excerpt . '</span>';
-					if ( self::get_option( 'include_excerpt_dash', $atts ) ) {
+					if ( self::get_option( 'include_excerpt_dash' ) ) {
 						$excerpt = ' <span class="excerpt-dash">-</span>' . $excerpt;
 					}
 				}
 			}
 
-			if ( self::get_option( 'include_content', $atts ) ) {
+			if ( self::get_option( 'include_content' ) ) {
 				add_filter( 'shortcode_atts_display-posts', array( __CLASS__, 'ezp_display_posts_off' ), 10, 3 );
 				/** This filter is documented in wp-includes/post-template.php */
-				$content = '<div class="' . implode( ' ', self::get_option( 'content_class', $atts ) ) . '">' . apply_filters( 'the_content', get_the_content() ) . '</div>';
+				$content = '<div class="' . implode( ' ', self::get_option( 'content_class' ) ) . '">' . apply_filters( 'the_content', get_the_content() ) . '</div>';
 				remove_filter( 'shortcode_atts_display-posts', array( __CLASS__, 'ezp_display_posts_off' ), 10 );
 			}
 
@@ -355,7 +405,7 @@ class Display_Posts {
 					foreach ( $terms as $term ) {
 						$term_output[] = '<a href="' . get_term_link( $term, $category_display ) . '">' . $term->name . '</a>';
 					}
-					$category_display_text = ' <span class="category-display"><span class="category-display-label">' . self::get_option( 'category_label', $atts ) . '</span> ' . implode( ', ', $term_output ) . '</span>';
+					$category_display_text = ' <span class="category-display"><span class="category-display-label">' . self::get_option( 'category_label' ) . '</span> ' . implode( ', ', $term_output ) . '</span>';
 				}
 
 				/**
@@ -365,8 +415,8 @@ class Display_Posts {
 				 *
 				 * @param string   $category_display Current Category Display text
 				 */
-				$category_display_text = apply_filters_deprecated( 'display_posts_shortcode_category_display', array( $category_display_text, $terms, $category_display, $untrusted ), '1.0', 'Easy_Plugins/Display_Posts/Post/Categories' );
-				$category_display_text = apply_filters( 'Easy_Plugins/Display_Posts/Post/Categories', $category_display_text, $terms, $category_display, $untrusted );
+				$category_display_text = apply_filters_deprecated( 'display_posts_shortcode_category_display', array( $category_display_text, $terms, $category_display, $this->untrusted ), '1.0', 'Easy_Plugins/Display_Posts/Post/Categories' );
+				$category_display_text = apply_filters( 'Easy_Plugins/Display_Posts/Post/Categories', $category_display_text, $terms, $category_display, $this->untrusted );
 			}
 
 			$class = array( 'listing-item' );
@@ -381,8 +431,8 @@ class Display_Posts {
 			 * @param WP_Query $dps_listing WP_Query object for the posts listing.
 			 * @param array    $untrusted   Original attributes passed to the shortcode.
 			 */
-			$class = apply_filters_deprecated( 'display_posts_shortcode_post_class', array( $class, $post, $dps_listing, $untrusted ), '1.0', 'Easy_Plugins/Display_Posts/Post/Class' );
-			$class = apply_filters( 'Easy_Plugins/Display_Posts/Post/Class', $class, $post, $dps_listing, $untrusted );
+			$class = apply_filters_deprecated( 'display_posts_shortcode_post_class', array( $class, $post, $dps_listing, $this->untrusted ), '1.0', 'Easy_Plugins/Display_Posts/Post/Class' );
+			$class = apply_filters( 'Easy_Plugins/Display_Posts/Post/Class', $class, $post, $dps_listing, $this->untrusted );
 
 			$class  = array_map( 'sanitize_html_class', $class );
 			$output = '<' . $inner_wrapper . ' class="' . implode( ' ', $class ) . '">' . $image . $title . $date . $author . $category_display_text . $excerpt . $content . '</' . $inner_wrapper . '>';
@@ -404,8 +454,8 @@ class Display_Posts {
 			 * @param string $author        HTML markup for the post's author.
 			 * @param string $category_display_text
 			 */
-			$output = apply_filters_deprecated( 'display_posts_shortcode_output', array( $output, $untrusted, $image, $title, $date, $excerpt, $inner_wrapper, $content, $class, $author, $category_display_text ), '1.0', 'Easy_Plugins/Display_Posts/Post/HTML' );
-			$inner .= apply_filters( 'Easy_Plugins/Display_Posts/Post/HTML', $output, $untrusted, $image, $title, $date, $excerpt, $inner_wrapper, $content, $class, $author, $category_display_text );
+			$output = apply_filters_deprecated( 'display_posts_shortcode_output', array( $output, $this->untrusted, $image, $title, $date, $excerpt, $inner_wrapper, $content, $class, $author, $category_display_text ), '1.0', 'Easy_Plugins/Display_Posts/Post/HTML' );
+			$inner .= apply_filters( 'Easy_Plugins/Display_Posts/Post/HTML', $output, $this->untrusted, $image, $title, $date, $excerpt, $inner_wrapper, $content, $class, $author, $category_display_text );
 
 		endwhile;
 		wp_reset_postdata();
@@ -419,8 +469,8 @@ class Display_Posts {
 		 * @param array  $untrusted    Original attributes passed to the shortcode.
 		 * @param object $dps_listing  WP Query object
 		 */
-		$open = apply_filters_deprecated( 'display_posts_shortcode_wrapper_open', array( '<' . $wrapper . $wrapper_class . $wrapper_id . '>', $untrusted, $dps_listing ), '1.0', 'Easy_Plugins/Display_Posts/HTML/Wrap_Open' );
-		$open = apply_filters( 'Easy_Plugins/Display_Posts/HTML/Wrap_Open', $open, $untrusted, $dps_listing );
+		$open = apply_filters_deprecated( 'display_posts_shortcode_wrapper_open', array( '<' . $wrapper . $wrapper_class . $wrapper_id . '>', $this->untrusted, $dps_listing ), '1.0', 'Easy_Plugins/Display_Posts/HTML/Wrap_Open' );
+		$open = apply_filters( 'Easy_Plugins/Display_Posts/HTML/Wrap_Open', $open, $this->untrusted, $dps_listing );
 
 		/**
 		 * Filter the shortcode output's closing outer wrapper element.
@@ -431,8 +481,8 @@ class Display_Posts {
 		 * @param array  $untrusted     Original attributes passed to the shortcode.
 		 * @param object $dps_listing   WP Query object
 		 */
-		$close = apply_filters_deprecated( 'display_posts_shortcode_wrapper_close', array( '</' . $wrapper . '>', $untrusted, $dps_listing ), '1.0', 'Easy_Plugins/Display_Posts/HTML/Wrap_Close' );
-		$close = apply_filters( 'Easy_Plugins/Display_Posts/HTML/Wrap_Close', $close, $untrusted, $dps_listing );
+		$close = apply_filters_deprecated( 'display_posts_shortcode_wrapper_close', array( '</' . $wrapper . '>', $this->untrusted, $dps_listing ), '1.0', 'Easy_Plugins/Display_Posts/HTML/Wrap_Close' );
+		$close = apply_filters( 'Easy_Plugins/Display_Posts/HTML/Wrap_Close', $close, $this->untrusted, $dps_listing );
 
 		$return = '';
 
@@ -446,8 +496,8 @@ class Display_Posts {
 			 * @param string $tag       Type of element to use for the output title tag. Default 'h2'.
 			 * @param array  $untrusted Original attributes passed to the shortcode.
 			 */
-			$title_tag = apply_filters_deprecated( 'display_posts_shortcode_title_tag', array( 'h2', $untrusted ), '1.0', 'Easy_Plugins/Display_Posts/Posts/HTML/Title_Tag' );
-			$title_tag = apply_filters( 'Easy_Plugins/Display_Posts/Posts/HTML/Title_Tag', $title_tag, $untrusted );
+			$title_tag = apply_filters_deprecated( 'display_posts_shortcode_title_tag', array( 'h2', $this->untrusted ), '1.0', 'Easy_Plugins/Display_Posts/Posts/HTML/Title_Tag' );
+			$title_tag = apply_filters( 'Easy_Plugins/Display_Posts/Posts/HTML/Title_Tag', $title_tag, $this->untrusted );
 
 			$return .= '<' . $title_tag . ' class="display-posts-title">' . $shortcode_title . '</' . $title_tag . '>' . "\n";
 		}
