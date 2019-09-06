@@ -286,7 +286,7 @@ class Display_Posts {
 			 * @param string $author        HTML markup for the post's author.
 			 * @param string $terms
 			 */
-			$output = apply_filters_deprecated( 'display_posts_shortcode_output', array( $output, $this->untrusted, $image, $title, $date, $excerpt, $inner_wrapper, $content, $class, $author, $terms ), '1.0', 'Easy_Plugins/Display_Posts/Post/HTML' );
+			$output = apply_filters_deprecated( 'display_posts_shortcode_output', array( $output, $this->untrusted, $image . ' ', $title, ' ' . $date, ' ' .  $excerpt, $inner_wrapper, $content, $class, ' ' . $author, ' ' . $terms ), '1.0', 'Easy_Plugins/Display_Posts/Post/HTML' );
 			$inner .= apply_filters( 'Easy_Plugins/Display_Posts/Post/HTML', $output, $this->untrusted, $image, $title, $date, $excerpt, $inner_wrapper, $content, $class, $author, $terms );
 
 		endwhile;
