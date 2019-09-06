@@ -4,6 +4,7 @@ namespace Easy_Plugins\Display_Posts\Shortcode;
 
 use Easy_Plugins\Display_Posts\Cache;
 use Easy_Plugins\Display_Posts\Query;
+use Easy_Plugins\Display_Posts\Template\Loader;
 use Easy_Plugins\Display_Posts\Template\Post\Partials;
 use WP_Post;
 use WP_Query;
@@ -96,6 +97,7 @@ class Display_Posts {
 			'display_posts_off' => FALSE,
 			'no_posts_message'  => '',
 			'title'             => '',
+			'template'          => 'default',
 			'wrapper'           => 'ul',
 			'wrapper_class'     => 'display-posts-listing',
 			'wrapper_id'        => '',
@@ -120,6 +122,7 @@ class Display_Posts {
 		switch ( $key ) {
 
 			case 'no_posts_message':
+			case 'template':
 			case 'title':
 			case 'wrapper':
 
@@ -267,27 +270,48 @@ class Display_Posts {
 			$class = apply_filters( 'Easy_Plugins/Display_Posts/Post/Class', $class, $post, $dps_listing, $this->untrusted );
 
 			$class  = array_map( 'sanitize_html_class', $class );
-			$output = '<' . $inner_wrapper . ' class="' . implode( ' ', $class ) . '">' . $image . $title . $date . $author . $terms . $excerpt . $content . '</' . $inner_wrapper . '>';
 
-			/**
-			 * Filter the HTML markup for output via the shortcode.
-			 *
-			 * @since 1.0
-			 *
-			 * @param string $output        The shortcode's HTML output.
-			 * @param array  $untrusted     Original attributes passed to the shortcode.
-			 * @param string $image         HTML markup for the post's featured image element.
-			 * @param string $title         HTML markup for the post's title element.
-			 * @param string $date          HTML markup for the post's date element.
-			 * @param string $excerpt       HTML markup for the post's excerpt element.
-			 * @param string $inner_wrapper Type of container to use for the post's inner wrapper element.
-			 * @param string $content       The post's content.
-			 * @param string $class         Space-separated list of post classes to supply to the $inner_wrapper element.
-			 * @param string $author        HTML markup for the post's author.
-			 * @param string $terms
-			 */
-			$output = apply_filters_deprecated( 'display_posts_shortcode_output', array( $output, $this->untrusted, $image . ' ', $title, ' ' . $date, ' ' .  $excerpt, $inner_wrapper, $content, $class, ' ' . $author, ' ' . $terms ), '1.0', 'Easy_Plugins/Display_Posts/Post/HTML' );
-			$inner .= apply_filters( 'Easy_Plugins/Display_Posts/Post/HTML', $output, $this->untrusted, $image, $title, $date, $excerpt, $inner_wrapper, $content, $class, $author, $terms );
+						//$templates = array( 'test.php' );
+
+			$loader        = new Loader();
+			$template_slug = $this->get_option( 'template', 'default' );
+			$templates     = $loader->get_template_names( $template_slug, 'post' );
+			$template      = $loader->locate_template( $templates );
+
+			ob_start();
+
+			/** @noinspection PhpIncludeInspection */
+			include $template;
+
+			$output = ob_get_clean();
+
+			// Only run the filter if the default template is being used.
+			if ( 'default' === $template_slug ) {
+
+				/**
+				 * Filter the HTML markup for output via the shortcode.
+				 *
+				 * @since 1.0
+				 *
+				 * @param string $output        The shortcode's HTML output.
+				 * @param array  $untrusted     Original attributes passed to the shortcode.
+				 * @param string $image         HTML markup for the post's featured image element.
+				 * @param string $title         HTML markup for the post's title element.
+				 * @param string $date          HTML markup for the post's date element.
+				 * @param string $excerpt       HTML markup for the post's excerpt element.
+				 * @param string $inner_wrapper Type of container to use for the post's inner wrapper element.
+				 * @param string $content       The post's content.
+				 * @param string $class         Space-separated list of post classes to supply to the $inner_wrapper element.
+				 * @param string $author        HTML markup for the post's author.
+				 * @param string $terms
+				 */
+				$output = apply_filters_deprecated( 'display_posts_shortcode_output', array( $output, $this->untrusted, $image . ' ', $title, ' ' . $date, ' ' .  $excerpt, $inner_wrapper, $content, $class, ' ' . $author, ' ' . $terms ), '1.0', 'Easy_Plugins/Display_Posts/Post/HTML' );
+				$inner .= apply_filters( 'Easy_Plugins/Display_Posts/Post/HTML', $output, $this->untrusted, $image, $title, $date, $excerpt, $inner_wrapper, $content, $class, $author, $terms );
+
+			} else {
+
+				$inner .= $output;
+			}
 
 		endwhile;
 		wp_reset_postdata();

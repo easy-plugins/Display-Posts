@@ -119,7 +119,9 @@ final class Display_Posts {
 					'Easy_Plugins\Display_Posts\Shortcode\Display_Posts' => 'includes/class.shortcode-display-posts.php',
 					'Easy_Plugins\Display_Posts\Cache'                   => 'includes/class.cache.php',
 					'Easy_Plugins\Display_Posts\Fragment'                => 'includes/class.cache.php',
+					'Easy_Plugins\Display_Posts\Template\Loader'         => 'includes/class.template-loader.php',
 					'Easy_Plugins\Display_Posts\Template\Post\Partials'  => 'includes/class.template-post-partials.php',
+					'Easy_Plugins\Display_Posts\Gamajo_Template_Loader'  => 'includes/vendor/class-gamajo-template-loader.php',
 				);
 
 				if ( ! isset( $registry[ $class ] ) ) {
