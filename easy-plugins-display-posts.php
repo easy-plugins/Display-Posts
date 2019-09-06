@@ -98,7 +98,7 @@ final class Display_Posts {
 	 */
 	private function hooks() {
 
-		add_shortcode( 'display-posts', array( 'Easy_Plugins\Display_Posts\Shortcode\Display_Posts', 'cache' ) );
+		add_shortcode( 'display-posts', array( 'Easy_Plugins\Display_Posts\Shortcode\Display_Posts', 'run' ) );
 		//add_action( 'save_post', array( 'Easy_Plugins\Display_Posts\Shortcode\Display_Posts', 'clear_cache' ) );
 		//add_action( 'created_term', array( 'Easy_Plugins\Display_Posts\Shortcode\Display_Posts', 'clear_cache' ) );
 		//add_action( 'edit_term', array( 'Easy_Plugins\Display_Posts\Shortcode\Display_Posts', 'clear_cache' ) );
@@ -119,6 +119,7 @@ final class Display_Posts {
 					'Easy_Plugins\Display_Posts\Shortcode\Display_Posts' => 'includes/class.shortcode-display-posts.php',
 					'Easy_Plugins\Display_Posts\Cache'                   => 'includes/class.cache.php',
 					'Easy_Plugins\Display_Posts\Fragment'                => 'includes/class.cache.php',
+					'Easy_Plugins\Display_Posts\Template\Post\Partials'  => 'includes/class.template-post-partials.php',
 				);
 
 				if ( ! isset( $registry[ $class ] ) ) {
@@ -142,6 +143,7 @@ final class Display_Posts {
 
 		require_once 'includes/inc.format.php';
 		require_once 'includes/inc.functions.php';
+		require_once 'includes/inc.template-partials.php';
 	}
 
 	/**
