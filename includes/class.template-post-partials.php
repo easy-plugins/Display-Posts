@@ -224,7 +224,12 @@ class Partials {
 
 				} else {
 
-					$html = wp_trim_words( strip_shortcodes( $post->post_content ), $length ) . $more;
+					$excerpt = wp_trim_words( strip_shortcodes( $post->post_content ), $length );
+
+					if ( 0 < strlen( $excerpt ) ) {
+
+						$html = $excerpt . $more;
+					}
 				}
 
 			// Use default, can customize with WP filters.
