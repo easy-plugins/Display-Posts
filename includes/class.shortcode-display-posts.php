@@ -8,6 +8,7 @@ use Easy_Plugins\Display_Posts\Template\Post\Partials;
 use WP_Post;
 use WP_Query;
 use function Easy_Plugins\Display_Posts\Template\Partials\no_posts_message;
+use function Easy_Plugins\Display_Posts\Template\Partials\posts_list_heading;
 use function Easy_Plugins\Display_Posts\Functions\{to_boolean};
 use function Easy_Plugins\Display_Posts\Formatting\{relative_date};
 
@@ -208,7 +209,6 @@ class Display_Posts {
 			return '';
 		}
 
-		$shortcode_title = $this->get_option( 'title', '' );
 		$wrapper         = $this->get_option( 'wrapper', 'ul' );
 		$wrapper_class   = $this->get_option( 'wrapper_class', 'display-posts-listing' );
 		$wrapper_id      = $this->get_option( 'wrapper_id', '' );
@@ -318,21 +318,7 @@ class Display_Posts {
 
 		$return = '';
 
-		if ( $shortcode_title ) {
-
-			/**
-			 * Filter the shortcode output title tag element.
-			 *
-			 * @since 1.0
-			 *
-			 * @param string $tag       Type of element to use for the output title tag. Default 'h2'.
-			 * @param array  $untrusted Original attributes passed to the shortcode.
-			 */
-			$title_tag = apply_filters_deprecated( 'display_posts_shortcode_title_tag', array( 'h2', $this->untrusted ), '1.0', 'Easy_Plugins/Display_Posts/Posts/HTML/Title_Tag' );
-			$title_tag = apply_filters( 'Easy_Plugins/Display_Posts/Posts/HTML/Title_Tag', $title_tag, $this->untrusted );
-
-			$return .= '<' . $title_tag . ' class="display-posts-title">' . $shortcode_title . '</' . $title_tag . '>' . "\n";
-		}
+		$return .= posts_list_heading( $this->get_option( 'title', '' ), $this->untrusted );
 
 		$return .= $open . $inner . $close;
 
