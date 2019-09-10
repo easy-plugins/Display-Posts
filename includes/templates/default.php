@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @var string $inner_wrapper
+ * @var string $item_tag
  * @var array  $class
  * @var string $image
  * @var string $title
@@ -11,4 +11,4 @@
  * @var string $excerpt
  * @var string $content
  */
-echo '<' . $inner_wrapper . ' class="' . implode( ' ', $class ) . '">' . $image . ' ' . $title . ' ' . $date . ' ' . $author . ' ' . $terms . ' ' . $excerpt . $content . '</' . $inner_wrapper . '>';
+echo '<' . $item_tag . ' class="' . implode( ' ', $class ) . '">' . $image . ' ' . $title . ' ' . $date . ' ' . $author . ' ' . $terms . ' ' . $excerpt . $content . '</' . $item_tag . '>';
