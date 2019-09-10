@@ -28,6 +28,18 @@ class Display_Posts {
 	private $untrusted = array();
 
 	/**
+	 * @since 1.0
+	 * @var string
+	 */
+	private $container_tag;
+
+	/**
+	 * @since 1.0
+	 * @var string
+	 */
+	private $post_container_tag;
+
+	/**
 	 * Display_Posts constructor.
 	 *
 	 * @since 1.0
@@ -42,6 +54,7 @@ class Display_Posts {
 
 		// Pull in shortcode attributes and set defaults.
 		$this->atts = shortcode_atts( $this->defaults(), $untrusted, $tag );
+		$this->setup_container_tags();
 	}
 
 	/**
@@ -197,6 +210,48 @@ class Display_Posts {
 	}
 
 	/**
+	 * Set up html elements used to wrap the posts.
+	 * Default is ul/li, but can also be ol/li and div/div.
+	 *
+	 * @since 1.0
+	 */
+	public function setup_container_tags() {
+
+		$this->container_tag = $this->get_option( 'wrapper', 'ul' );
+
+		if ( ! in_array( $this->get_container_tag(), array( 'ul', 'ol', 'div' ), true ) ) {
+
+			$this->container_tag = 'ul';
+		}
+
+		$this->post_container_tag = 'div' === $this->get_container_tag() ? 'div' : 'li';
+	}
+
+	/**
+	 * Return the posts container HTML tag.
+	 *
+	 * @since 1.0
+	 *
+	 * @return string
+	 */
+	public function get_container_tag() : string {
+
+		return $this->container_tag;
+	}
+
+	/**
+	 * Return the post item HTML tag.
+	 *
+	 * @since 1.0
+	 *
+	 * @return string
+	 */
+	public function get_post_container_tag() : string {
+
+		return $this->post_container_tag;
+	}
+
+	/**
 	 * Render the display-posts shortcode.
 	 *
 	 * To customize, use the following filters: https://displayposts.com/docs/filters/
@@ -220,16 +275,8 @@ class Display_Posts {
 		}
 
 		$default_template = TRUE;
-		$container_tag    = $this->get_option( 'wrapper', 'ul' );
 		$posts_html       = '';
-
-		// Set up html elements used to wrap the posts.
-		// Default is ul/li, but can also be ol/li and div/div.
-		if ( ! in_array( $container_tag, array( 'ul', 'ol', 'div' ), true ) ) {
-			$container_tag = 'ul';
-		}
-
-		$item_tag = 'div' === $container_tag ? 'div' : 'li';
+		$tag              = $this->get_post_container_tag();
 
 		// Get the template specified by user.
 		if ( ! empty( $template = $this->get_option( 'template' ) ) ) {
@@ -321,14 +368,14 @@ class Display_Posts {
 				 * @param string $title     HTML markup for the post's title element.
 				 * @param string $date      HTML markup for the post's date element.
 				 * @param string $excerpt   HTML markup for the post's excerpt element.
-				 * @param string $item_tag  Type of container to use for the post's inner wrapper element.
+				 * @param string $tag       Type of container to use for the post's inner wrapper element.
 				 * @param string $content   The post's content.
 				 * @param string $class     Space-separated list of post classes to supply to the $item_tag element.
 				 * @param string $author    HTML markup for the post's author.
 				 * @param string $terms
 				 */
-				$output = apply_filters_deprecated( 'display_posts_shortcode_output', array( $output, $this->untrusted, $image . ' ', $title, ' ' . $date, ' ' .  $excerpt, $item_tag, $content, $class, ' ' . $author, ' ' . $terms ), '1.0', 'Easy_Plugins/Display_Posts/Post/HTML' );
-				$posts_html .= apply_filters( 'Easy_Plugins/Display_Posts/Post/HTML', $output, $this, $partial, $item_tag, $class );
+				$output = apply_filters_deprecated( 'display_posts_shortcode_output', array( $output, $this->untrusted, $image . ' ', $title, ' ' . $date, ' ' .  $excerpt, $tag, $content, $class, ' ' . $author, ' ' . $terms ), '1.0', 'Easy_Plugins/Display_Posts/Post/HTML' );
+				$posts_html .= apply_filters( 'Easy_Plugins/Display_Posts/Post/HTML', $output, $this, $partial, $class );
 
 			} else {
 
@@ -360,7 +407,7 @@ class Display_Posts {
 		 * @param array  $untrusted    Original attributes passed to the shortcode.
 		 * @param object $dps_listing  WP Query object
 		 */
-		$open = apply_filters_deprecated( 'display_posts_shortcode_wrapper_open', array( '<' . $container_tag . $wrapper_class . $wrapper_id . '>', $this->untrusted, $dps_listing ), '1.0', 'Easy_Plugins/Display_Posts/HTML/Wrap_Open' );
+		$open = apply_filters_deprecated( 'display_posts_shortcode_wrapper_open', array( '<' . $this->get_container_tag() . $wrapper_class . $wrapper_id . '>', $this->untrusted, $dps_listing ), '1.0', 'Easy_Plugins/Display_Posts/HTML/Wrap_Open' );
 
 		/**
 		 * Filter the shortcode output's opening outer wrapper element.
@@ -382,7 +429,7 @@ class Display_Posts {
 		 * @param array  $untrusted     Original attributes passed to the shortcode.
 		 * @param object $dps_listing   WP Query object
 		 */
-		$close = apply_filters_deprecated( 'display_posts_shortcode_wrapper_close', array( '</' . $container_tag . '>', $this->untrusted, $dps_listing ), '1.0', 'Easy_Plugins/Display_Posts/HTML/Wrap_Close' );
+		$close = apply_filters_deprecated( 'display_posts_shortcode_wrapper_close', array( '</' . $this->get_container_tag() . '>', $this->untrusted, $dps_listing ), '1.0', 'Easy_Plugins/Display_Posts/HTML/Wrap_Close' );
 
 		/**
 		 * Filter the shortcode output's closing outer wrapper element.
