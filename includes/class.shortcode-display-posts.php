@@ -97,7 +97,7 @@ class Display_Posts {
 			'display_posts_off' => FALSE,
 			'no_posts_message'  => '',
 			'title'             => '',
-			'template'          => 'default',
+			'template'          => '',
 			'wrapper'           => 'ul',
 			'wrapper_class'     => 'display-posts-listing',
 			'wrapper_id'        => '',
@@ -239,6 +239,20 @@ class Display_Posts {
 			return no_posts_message( $this->get_option( 'no_posts_message', '' ) );
 		}
 
+		// Get the template specified by user.
+		if ( ! empty( $template = $this->get_option( 'template' ) ) ) {
+
+			$default_template = FALSE;
+			$template_path    = Loader::get_template_path( $template );
+		}
+
+		// If no template was specified by user or user misspelled the template name, get the default template.
+		if ( empty( $template_path ) ) {
+
+			$default_template = TRUE;
+			$template_path    = Loader::get_template_path( 'default' );
+		}
+
 		$inner = '';
 		while ( $dps_listing->have_posts() ) :
 			$dps_listing->the_post();
@@ -271,22 +285,15 @@ class Display_Posts {
 
 			$class  = array_map( 'sanitize_html_class', $class );
 
-						//$templates = array( 'test.php' );
-
-			$loader        = new Loader();
-			$template_slug = $this->get_option( 'template', 'default' );
-			$templates     = $loader->get_template_names( $template_slug, 'post' );
-			$template      = $loader->locate_template( $templates );
-
 			ob_start();
 
 			/** @noinspection PhpIncludeInspection */
-			include $template;
+			include $template_path;
 
 			$output = ob_get_clean();
 
 			// Only run the filter if the default template is being used.
-			if ( 'default' === $template_slug ) {
+			if ( TRUE === $default_template ) {
 
 				/**
 				 * Filter the HTML markup for output via the shortcode.
