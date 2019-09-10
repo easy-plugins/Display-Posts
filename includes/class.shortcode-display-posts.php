@@ -347,13 +347,9 @@ class Display_Posts {
 		$close = apply_filters_deprecated( 'display_posts_shortcode_wrapper_close', array( '</' . $wrapper . '>', $this->untrusted, $dps_listing ), '1.0', 'Easy_Plugins/Display_Posts/HTML/Wrap_Close' );
 		$close = apply_filters( 'Easy_Plugins/Display_Posts/HTML/Wrap_Close', $close, $this->untrusted, $dps_listing );
 
-		$return = '';
+		$heading = posts_list_heading( $this->get_option( 'title', '' ), $this->untrusted );
 
-		$return .= posts_list_heading( $this->get_option( 'title', '' ), $this->untrusted );
-
-		$return .= $open . $inner . $close;
-
-		return $return;
+		return $heading . $open . $inner . $close;
 	}
 
 	/**
