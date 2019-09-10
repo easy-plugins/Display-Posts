@@ -297,8 +297,8 @@ class Display_Posts {
 			/**
 			 * @since 1.0
 			 *
-			 * @param $this Display_Posts
-			 * @param $partial Partials
+			 * @param Display_Posts $this
+			 * @param Partials      $partial
 			 */
 			do_action( 'Easy_Plugins/Display_Posts/Post/Before', $this, $partial );
 
@@ -308,8 +308,8 @@ class Display_Posts {
 			/**
 			 * @since 1.0
 			 *
-			 * @param $this Display_Posts
-			 * @param $partial Partials
+			 * @param Display_Posts $this
+			 * @param Partials      $partial
 			 */
 			do_action( 'Easy_Plugins/Display_Posts/Post/After', $this, $partial );
 
