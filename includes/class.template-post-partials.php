@@ -244,7 +244,7 @@ class Partials {
 
 				if ( $this->get_option( 'include_excerpt_dash', TRUE ) ) {
 
-					$html = '<span class="excerpt-dash">-</span>' . $html;
+					$html = '<span class="excerpt-dash">-</span> ' . $html;
 				}
 			}
 		}
