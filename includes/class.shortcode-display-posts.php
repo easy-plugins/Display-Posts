@@ -287,8 +287,24 @@ class Display_Posts {
 
 			ob_start();
 
+			/**
+			 * @since 1.0
+			 *
+			 * @param $this Display_Posts
+			 * @param $partial Partials
+			 */
+			do_action( 'Easy_Plugins/Display_Posts/Post/Before', $this, $partial );
+
 			/** @noinspection PhpIncludeInspection */
 			include $template_path;
+
+			/**
+			 * @since 1.0
+			 *
+			 * @param $this Display_Posts
+			 * @param $partial Partials
+			 */
+			do_action( 'Easy_Plugins/Display_Posts/Post/After', $this, $partial );
 
 			$output = ob_get_clean();
 
