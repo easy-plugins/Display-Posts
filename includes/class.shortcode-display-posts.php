@@ -273,6 +273,7 @@ class Display_Posts {
 			/**
 			 * Filter the post classes for the inner wrapper element of the current post.
 			 *
+			 * @deprecated
 			 * @since 1.0
 			 *
 			 * @param array    $class       Post classes.
@@ -281,9 +282,15 @@ class Display_Posts {
 			 * @param array    $untrusted   Original attributes passed to the shortcode.
 			 */
 			$class = apply_filters_deprecated( 'display_posts_shortcode_post_class', array( $class, $post, $dps_listing, $this->untrusted ), '1.0', 'Easy_Plugins/Display_Posts/Post/Class' );
-			$class = apply_filters( 'Easy_Plugins/Display_Posts/Post/Class', $class, $post, $dps_listing, $this->untrusted );
 
-			$class  = array_map( 'sanitize_html_class', $class );
+			/**
+			 * @since 1.0
+			 *
+			 * @param array $class        Post classes.
+			 * @param $this Display_Posts
+			 */
+			$class = apply_filters( 'Easy_Plugins/Display_Posts/Post/Class', $class, $this );
+			$class = array_map( 'sanitize_html_class', $class );
 
 			ob_start();
 
