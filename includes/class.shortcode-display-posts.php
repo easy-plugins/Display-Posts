@@ -349,6 +349,7 @@ class Display_Posts {
 		/**
 		 * Filter the shortcode output's opening outer wrapper element.
 		 *
+		 * @deprecated
 		 * @since 1.0
 		 *
 		 * @param string $wrapper_open HTML markup for the opening outer wrapper element.
@@ -356,11 +357,21 @@ class Display_Posts {
 		 * @param object $dps_listing  WP Query object
 		 */
 		$open = apply_filters_deprecated( 'display_posts_shortcode_wrapper_open', array( '<' . $wrapper . $wrapper_class . $wrapper_id . '>', $this->untrusted, $dps_listing ), '1.0', 'Easy_Plugins/Display_Posts/HTML/Wrap_Open' );
-		$open = apply_filters( 'Easy_Plugins/Display_Posts/HTML/Wrap_Open', $open, $this->untrusted, $dps_listing );
+
+		/**
+		 * Filter the shortcode output's opening outer wrapper element.
+		 *
+		 * @since 1.0
+		 *
+		 * @param string        $open HTML markup for the opening outer wrapper element.
+		 * @param Display_Posts $this
+		 */
+		$open = apply_filters( 'Easy_Plugins/Display_Posts/HTML/Wrap_Open', $open, $this );
 
 		/**
 		 * Filter the shortcode output's closing outer wrapper element.
 		 *
+		 * @deprecated
 		 * @since 1.0
 		 *
 		 * @param string $wrapper_close HTML markup for the closing outer wrapper element.
@@ -368,7 +379,16 @@ class Display_Posts {
 		 * @param object $dps_listing   WP Query object
 		 */
 		$close = apply_filters_deprecated( 'display_posts_shortcode_wrapper_close', array( '</' . $wrapper . '>', $this->untrusted, $dps_listing ), '1.0', 'Easy_Plugins/Display_Posts/HTML/Wrap_Close' );
-		$close = apply_filters( 'Easy_Plugins/Display_Posts/HTML/Wrap_Close', $close, $this->untrusted, $dps_listing );
+
+		/**
+		 * Filter the shortcode output's closing outer wrapper element.
+		 *
+		 * @since 1.0
+		 *
+		 * @param string        $close HTML markup for the closing outer wrapper element.
+		 * @param Display_Posts $this
+		 */
+		$close = apply_filters( 'Easy_Plugins/Display_Posts/HTML/Wrap_Close', $close, $this );
 
 		$heading = posts_list_heading( $this->get_option( 'title', '' ), $this->untrusted );
 
