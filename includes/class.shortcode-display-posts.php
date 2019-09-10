@@ -212,32 +212,24 @@ class Display_Posts {
 			return '';
 		}
 
-		$wrapper         = $this->get_option( 'wrapper', 'ul' );
-		$wrapper_class   = $this->get_option( 'wrapper_class', 'display-posts-listing' );
-		$wrapper_id      = $this->get_option( 'wrapper_id', '' );
-
-		if ( ! empty( $wrapper_class ) ) {
-			$wrapper_class = ' class="' . implode( ' ', $wrapper_class ) . '"';
-		}
-
-		if ( ! empty( $wrapper_id ) ) {
-			$wrapper_id = ' id="' . $wrapper_id . '"';
-		}
-
-		// Set up html elements used to wrap the posts.
-		// Default is ul/li, but can also be ol/li and div/div.
-		$wrapper_options = array( 'ul', 'ol', 'div' );
-		if ( ! in_array( $wrapper, $wrapper_options, true ) ) {
-			$wrapper = 'ul';
-		}
-		$inner_wrapper = 'div' === $wrapper ? 'div' : 'li';
-
 		$dps_listing = Query::run( $this->untrusted );
 
 		if ( ! $dps_listing->have_posts() ) {
 
 			return no_posts_message( $this->get_option( 'no_posts_message', '' ) );
 		}
+
+		$default_template  = TRUE;
+		$wrapper_outer_tag = $this->get_option( 'wrapper', 'ul' );
+		$inner             = '';
+
+		// Set up html elements used to wrap the posts.
+		// Default is ul/li, but can also be ol/li and div/div.
+		if ( ! in_array( $wrapper_outer_tag, array( 'ul', 'ol', 'div' ), true ) ) {
+			$wrapper_outer_tag = 'ul';
+		}
+
+		$wrapper_inner_tag = 'div' === $wrapper_outer_tag ? 'div' : 'li';
 
 		// Get the template specified by user.
 		if ( ! empty( $template = $this->get_option( 'template' ) ) ) {
@@ -253,7 +245,6 @@ class Display_Posts {
 			$template_path    = Loader::get_template_path( 'default' );
 		}
 
-		$inner = '';
 		while ( $dps_listing->have_posts() ) :
 			$dps_listing->the_post();
 			global $post;
@@ -323,20 +314,20 @@ class Display_Posts {
 				 *
 				 * @since 1.0
 				 *
-				 * @param string $output        The shortcode's HTML output.
-				 * @param array  $untrusted     Original attributes passed to the shortcode.
-				 * @param string $image         HTML markup for the post's featured image element.
-				 * @param string $title         HTML markup for the post's title element.
-				 * @param string $date          HTML markup for the post's date element.
-				 * @param string $excerpt       HTML markup for the post's excerpt element.
-				 * @param string $inner_wrapper Type of container to use for the post's inner wrapper element.
-				 * @param string $content       The post's content.
-				 * @param string $class         Space-separated list of post classes to supply to the $inner_wrapper element.
-				 * @param string $author        HTML markup for the post's author.
+				 * @param string $output            The shortcode's HTML output.
+				 * @param array  $untrusted         Original attributes passed to the shortcode.
+				 * @param string $image             HTML markup for the post's featured image element.
+				 * @param string $title             HTML markup for the post's title element.
+				 * @param string $date              HTML markup for the post's date element.
+				 * @param string $excerpt           HTML markup for the post's excerpt element.
+				 * @param string $wrapper_inner_tag Type of container to use for the post's inner wrapper element.
+				 * @param string $content           The post's content.
+				 * @param string $class             Space-separated list of post classes to supply to the $wrapper_inner_tag element.
+				 * @param string $author            HTML markup for the post's author.
 				 * @param string $terms
 				 */
-				$output = apply_filters_deprecated( 'display_posts_shortcode_output', array( $output, $this->untrusted, $image . ' ', $title, ' ' . $date, ' ' .  $excerpt, $inner_wrapper, $content, $class, ' ' . $author, ' ' . $terms ), '1.0', 'Easy_Plugins/Display_Posts/Post/HTML' );
-				$inner .= apply_filters( 'Easy_Plugins/Display_Posts/Post/HTML', $output, $this->untrusted, $image, $title, $date, $excerpt, $inner_wrapper, $content, $class, $author, $terms );
+				$output = apply_filters_deprecated( 'display_posts_shortcode_output', array( $output, $this->untrusted, $image . ' ', $title, ' ' . $date, ' ' .  $excerpt, $wrapper_inner_tag, $content, $class, ' ' . $author, ' ' . $terms ), '1.0', 'Easy_Plugins/Display_Posts/Post/HTML' );
+				$inner .= apply_filters( 'Easy_Plugins/Display_Posts/Post/HTML', $output, $this, $partial, $wrapper_inner_tag, $class );
 
 			} else {
 
@@ -345,6 +336,17 @@ class Display_Posts {
 
 		endwhile;
 		wp_reset_postdata();
+
+		$wrapper_class = $this->get_option( 'wrapper_class', 'display-posts-listing' );
+		$wrapper_id    = $this->get_option( 'wrapper_id', '' );
+
+		if ( ! empty( $wrapper_class ) ) {
+			$wrapper_class = ' class="' . implode( ' ', $wrapper_class ) . '"';
+		}
+
+		if ( ! empty( $wrapper_id ) ) {
+			$wrapper_id = ' id="' . $wrapper_id . '"';
+		}
 
 		/**
 		 * Filter the shortcode output's opening outer wrapper element.
@@ -356,7 +358,7 @@ class Display_Posts {
 		 * @param array  $untrusted    Original attributes passed to the shortcode.
 		 * @param object $dps_listing  WP Query object
 		 */
-		$open = apply_filters_deprecated( 'display_posts_shortcode_wrapper_open', array( '<' . $wrapper . $wrapper_class . $wrapper_id . '>', $this->untrusted, $dps_listing ), '1.0', 'Easy_Plugins/Display_Posts/HTML/Wrap_Open' );
+		$open = apply_filters_deprecated( 'display_posts_shortcode_wrapper_open', array( '<' . $wrapper_outer_tag . $wrapper_class . $wrapper_id . '>', $this->untrusted, $dps_listing ), '1.0', 'Easy_Plugins/Display_Posts/HTML/Wrap_Open' );
 
 		/**
 		 * Filter the shortcode output's opening outer wrapper element.
@@ -378,7 +380,7 @@ class Display_Posts {
 		 * @param array  $untrusted     Original attributes passed to the shortcode.
 		 * @param object $dps_listing   WP Query object
 		 */
-		$close = apply_filters_deprecated( 'display_posts_shortcode_wrapper_close', array( '</' . $wrapper . '>', $this->untrusted, $dps_listing ), '1.0', 'Easy_Plugins/Display_Posts/HTML/Wrap_Close' );
+		$close = apply_filters_deprecated( 'display_posts_shortcode_wrapper_close', array( '</' . $wrapper_outer_tag . '>', $this->untrusted, $dps_listing ), '1.0', 'Easy_Plugins/Display_Posts/HTML/Wrap_Close' );
 
 		/**
 		 * Filter the shortcode output's closing outer wrapper element.
