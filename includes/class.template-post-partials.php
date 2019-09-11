@@ -84,7 +84,7 @@ class Partials {
 	 *
 	 * @return string
 	 */
-	public function the_title() : string {
+	public function get_the_title() : string {
 
 		$include_title = $this->get_option( 'include_title', TRUE );
 		$include_link  = $this->get_option( 'include_link', TRUE );
@@ -105,10 +105,18 @@ class Partials {
 
 	/**
 	 * @since 1.0
+	 */
+	public function the_title() {
+
+		echo $this->get_the_title();
+	}
+
+	/**
+	 * @since 1.0
 	 *
 	 * @return string
 	 */
-	public function the_featured_image() : string {
+	public function get_the_featured_image() : string {
 
 		$image_size   = $this->get_option( 'image_size', '' );
 		$include_link = $this->get_option( 'include_link', TRUE );
@@ -138,10 +146,18 @@ class Partials {
 
 	/**
 	 * @since 1.0
+	 */
+	public function the_featured_image() {
+
+		echo $this->get_the_featured_image();
+	}
+
+	/**
+	 * @since 1.0
 	 *
 	 * @return string
 	 */
-	public function the_date() : string {
+	public function get_the_date() : string {
 
 		$date_format = $this->get_option( 'date_format', '(n/j/Y)' );
 		$html        = '';
@@ -165,10 +181,18 @@ class Partials {
 
 	/**
 	 * @since 1.0
+	 */
+	public function the_date() {
+
+		echo $this->get_the_date();
+	}
+
+	/**
+	 * @since 1.0
 	 *
 	 * @return string
 	 */
-	public function the_author() : string {
+	public function get_the_author() : string {
 
 		$html = '';
 
@@ -190,10 +214,18 @@ class Partials {
 
 	/**
 	 * @since 1.0
+	 */
+	public function the_author() {
+
+		echo $this->get_the_author();
+	}
+
+	/**
+	 * @since 1.0
 	 *
 	 * @return string
 	 */
-	public function the_excerpt() : string {
+	public function get_the_excerpt() : string {
 
 		global $post;
 
@@ -254,10 +286,18 @@ class Partials {
 
 	/**
 	 * @since 1.0
+	 */
+	public function the_excerpt() {
+
+		echo $this->get_the_excerpt();
+	}
+
+	/**
+	 * @since 1.0
 	 *
 	 * @return string
 	 */
-	public function the_content() : string {
+	public function get_the_content() : string {
 
 		$html = '';
 
@@ -276,10 +316,18 @@ class Partials {
 
 	/**
 	 * @since 1.0
+	 */
+	public function the_content() {
+
+		echo $this->get_the_content();
+	}
+
+	/**
+	 * @since 1.0
 	 *
 	 * @return string
 	 */
-	public function the_terms() : string {
+	public function get_the_terms() : string {
 
 		$display  = $this->get_option( 'category_display', FALSE );
 		$taxonomy = 'category';
@@ -321,5 +369,13 @@ class Partials {
 		}
 
 		return  $html;
+	}
+
+	/**
+	 * @since 1.0
+	 */
+	public function the_terms() {
+
+		echo $this->get_the_terms();
 	}
 }

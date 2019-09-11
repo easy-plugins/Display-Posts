@@ -299,13 +299,13 @@ class Display_Posts {
 
 			$partial = new Partials( $this->untrusted );
 
-			$title   = $partial->the_title();
-			$image   = $partial->the_featured_image();
-			$date    = $partial->the_date();
-			$author  = $partial->the_author();
-			$excerpt = $partial->the_excerpt();
-			$content = $partial->the_content();
-			$terms   = $partial->the_terms();
+			$title   = $partial->get_the_title();
+			$image   = $partial->get_the_featured_image();
+			$date    = $partial->get_the_date();
+			$author  = $partial->get_the_author();
+			$excerpt = $partial->get_the_excerpt();
+			$content = $partial->get_the_content();
+			$terms   = $partial->get_the_terms();
 
 			$class = array( 'listing-item' );
 
