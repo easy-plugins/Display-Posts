@@ -248,20 +248,15 @@ class Partials {
 
 				if ( has_excerpt() && $full_manual_excerpt ) {
 
-					$html = $post->post_excerpt . $more;
+					$html = $post->post_excerpt . '&hellip;' .  $more;
 
 				} elseif ( has_excerpt() ) {
 
-					$html = wp_trim_words( strip_shortcodes( $post->post_excerpt ), $length ) . $more;
+					$html = wp_trim_words( strip_shortcodes( $post->post_excerpt ), $length, '&hellip;' . $more );
 
 				} else {
 
-					$excerpt = wp_trim_words( strip_shortcodes( $post->post_content ), $length );
-
-					if ( 0 < strlen( $excerpt ) ) {
-
-						$html = $excerpt . $more;
-					}
+					$html = wp_trim_words( strip_shortcodes( $post->post_content ), $length, '&hellip;' .  $more );
 				}
 
 			// Use default, can customize with WP filters.
