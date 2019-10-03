@@ -122,6 +122,11 @@ class Partials {
 		$include_link = $this->get_option( 'include_link', TRUE );
 		$html        = '';
 
+		/*
+		 * @todo Check for false as image_size so image can be disabled.
+		 *
+		 * if( $atts['image_size'] && false !== filter_var( $atts['image_size'], FILTER_VALIDATE_BOOLEAN ) )
+		 */
 		if ( $image_size && has_post_thumbnail() && $include_link ) {
 
 			$html = '<a class="image" href="' . get_permalink() . '">' . get_the_post_thumbnail( get_the_ID(), $image_size ) . '</a>';
