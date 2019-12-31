@@ -10,6 +10,6 @@ namespace Easy_Plugins\Display_Posts\Formatting;
  */
 function relative_date( int $date ) : string {
 
-	return human_time_diff( $date ) . ' ' . __( 'ago', 'easy-plugins-display-posts' );
+	return human_time_diff( $date, current_time( 'timestamp' ) ) . ' ' . __( 'ago', 'easy-plugins-display-posts' );
 }
 
